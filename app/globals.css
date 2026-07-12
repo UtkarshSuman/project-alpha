@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   FEATURE: Design tokens (Docent brand system) — Tailwind v4 @theme syntax
+   Defining these generates real utility classes automatically:
+   bg-ink, bg-surface, bg-surface-hover, border-line, text-text, text-muted,
+   text-accent, bg-accent, text-accent-2, bg-accent-2, font-display
+   ============================================================================ */
+:root {
+  --color-ink: #0b0e14;
+  --color-surface: #131722;
+  --color-surface-hover: #171c29;
+  --color-line: #232838;
+  --color-text: #e7e9ee;
+  --color-muted: #8b92a6;
+  --color-accent: #f2a93b;
+  --color-accent-2: #4fd1c5;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-text);
+}
+
+@keyframes pulse-arrow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.pipeline-arrow { animation: pulse-arrow 2.4s ease-in-out infinite; }
+.pipeline-arrow:nth-child(2) { animation-delay: 0.3s; }
+.pipeline-arrow:nth-child(3) { animation-delay: 0.6s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-arrow { animation: none; opacity: 0.7; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-2);
+  outline-offset: 2px;
+}
