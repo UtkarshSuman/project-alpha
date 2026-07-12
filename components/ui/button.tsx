@@ -16,7 +16,7 @@ const variants = {
   primary:
     "text-accent text-ink font-semibold hover:brightness-110",
   secondary:
-    "bg-surface text-text border border-line hover:bg-[var(--surface-hover)]",
+    "bg-surface text-text border border-line hover:bg-surface-hover",
   ghost:
     "text-muted hover:text-text",
 };
