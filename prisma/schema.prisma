@@ -1,8 +1,257 @@
+// ============================================================================
+// DATABASE SCHEMA
+// Built in Section 1 (Project Foundation)
+//
+// FEATURES ENCODED IN THIS SCHEMA:
+// - Multi-tenant orgs (a user can belong to / own an organization)
+// - Multiple chatbots per org, each with its own persona + model config
+// - Per-chatbot document store with ingestion status tracking (for async jobs)
+// - Chunk-level storage for RAG (kept in Postgres via pgvector; swap to
+//   Pinecone/Qdrant by removing `embedding` column and storing external ids)
+// - Hashed API keys (never store raw keys) with per-key usage stats
+// - Usage logs at the request level -> powers analytics AND billing metering
+// - Conversation/message history -> powers analytics + "unanswered questions"
+// - Stripe subscription mirror for plan/quota enforcement
+// - Feedback (thumbs up/down) on messages -> RAG quality feedback loop
+// ============================================================================
+
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector, pgcrypto, uuid_ossp(map: "uuid-ossp"), pg_stat_statements, supabase_vault]
+}
+
+// --------------------------- ACCOUNTS & AUTH ---------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String? // null if user signed up via OAuth
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  memberships   Membership[]
+  sessions      Session[]
+  accounts      Account[]
+}
+
+// Join table: which orgs a user belongs to, and their role in each
+model Membership {
+  id       String   @id @default(cuid())
+  userId   String
+  orgId    String
+  role     Role     @default(OWNER)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// NextAuth required models (session/account) — minimal fields
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------- ORG & BILLING ---------------------------
+
+model Organization {
+  id                   String   @id @default(cuid())
+  name                 String
+  createdAt            DateTime @default(now())
+
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  plan                 Plan     @default(FREE)
+  planStatus           String?  // active | past_due | canceled etc (mirrors Stripe)
+  currentPeriodEnd     DateTime?
+
+  // Monthly quota tracking (reset by a scheduled job)
+  messageQuota         Int      @default(100)
+  messagesUsedThisPeriod Int    @default(0)
+
+  memberships Membership[]
+  chatbots    Chatbot[]
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  SCALE
+}
+
+// --------------------------- CHATBOTS ---------------------------
+
+model Chatbot {
+  id            String   @id @default(cuid())
+  orgId         String
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  name          String
+  systemPrompt  String   @default("You are a helpful assistant. Only answer using the provided context.")
+  model         String   @default("claude-sonnet-4-6")
+  temperature   Float    @default(0.3)
+
+  // Branding for the embeddable widget
+  widgetTitle       String  @default("Chat with us")
+  widgetColor       String  @default("#6366f1")
+  widgetLogoUrl     String?
+  welcomeMessage    String  @default("Hi! Ask me anything about this site.")
+
+  // Guardrails
+  restrictToContext Boolean @default(true) // refuse to answer off-topic questions
+  leadCaptureEnabled Boolean @default(false) // capture email when bot can't answer
+
+  status        ChatbotStatus @default(READY)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  documents     Document[]
+  apiKeys       ApiKey[]
+  conversations Conversation[]
+
+  @@index([orgId])
+}
+
+enum ChatbotStatus {
+  DRAFT     // created but no documents ingested yet
+  INGESTING
+  READY
+  ERROR
+}
+
+// --------------------------- DOCUMENTS & CHUNKS (RAG) ---------------------------
+
+model Document {
+  id           String   @id @default(cuid())
+  chatbotId    String
+  chatbot      Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  filename     String
+  storageUrl   String   // S3/R2 object URL
+  fileType     String   // pdf | txt
+  charCount    Int      @default(0)
+  status       DocumentStatus @default(PENDING)
+  errorMessage String?
+  enabled      Boolean  @default(true) // toggle without deleting
+
+  createdAt    DateTime @default(now())
+  chunks       DocumentChunk[]
+
+  @@index([chatbotId])
+}
+
+enum DocumentStatus {
+  PENDING
+  PARSING
+  EMBEDDING
+  READY
+  FAILED
+}
+
+model DocumentChunk {
+  id          String   @id @default(cuid())
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  content     String   @db.Text
+  chunkIndex  Int
+  tokenCount  Int
+  embedding   Unsupported("vector(1536)")? // pgvector column
+
+  @@index([documentId])
+}
+
+// --------------------------- API KEYS & USAGE ---------------------------
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  chatbotId   String
+  chatbot     Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  name        String   // e.g. "Production key"
+  keyPrefix   String   // first 8 chars shown in UI, e.g. "sk_live_a1b2"
+  keyHash     String   @unique // sha256 hash of full key, never store raw
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  usageLogs   UsageLog[]
+
+  @@index([chatbotId])
+}
+
+model UsageLog {
+  id            String   @id @default(cuid())
+  apiKeyId      String
+  apiKey        ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  tokensIn      Int
+  tokensOut     Int
+  latencyMs     Int
+  statusCode    Int      @default(200)
+  createdAt     DateTime @default(now())
+
+  @@index([apiKeyId, createdAt])
+}
+
+// --------------------------- CONVERSATIONS ---------------------------
+
+model Conversation {
+  id          String   @id @default(cuid())
+  chatbotId   String
+  chatbot     Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  sessionId   String   // widget-generated anonymous session id
+  visitorEmail String? // captured via lead-capture flow
+  createdAt   DateTime @default(now())
+
+  messages    Message[]
+
+  @@index([chatbotId, createdAt])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           String   // "user" | "assistant"
+  content        String   @db.Text
+  wasAnswered    Boolean  @default(true) // false if low-confidence/fallback triggered
+  feedback       Int?     // 1 = thumbs up, -1 = thumbs down, null = no feedback
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
 }
