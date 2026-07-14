@@ -1,0 +1,112 @@
+// ============================================================================
+// FEATURE: Document ingestion pipeline (runs as a background job)
+// Triggered by the "document/uploaded" event sent from the upload API route.
+//
+// Steps (each is independently retried by Inngest on failure):
+// 1. Parse   — download original file from storage, extract raw text
+// 2. Chunk   — split into overlapping windows
+// 3. Embed   — batch-embed chunks, insert into DocumentChunk (raw SQL, since
+//              the `embedding` column is a pgvector type Prisma can't
+//              natively write to via its normal .create() API)
+// 4. Finalize — mark document READY, flip chatbot to READY if this was its
+//              first successfully ingested document
+// ============================================================================
+
+
+// ============================================================================
+// FEATURE: Document ingestion pipeline (runs as a background job)
+// Triggered by the "document/uploaded" event sent from the upload API route.
+// Uses Inngest v4 API — triggers now live inside the config object (1st arg)
+// instead of being a separate 2nd argument.
+// ============================================================================
+
+import { inngest } from "@/lib/inngest/client";
+import { prisma } from "@/lib/db/prisma";
+import { getFromStorage } from "@/lib/storage";
+import { chunkText } from "@/lib/ai/chunk";
+import { embedTexts } from "@/lib/ai/embeddings";
+import { PDFParse } from "pdf-parse";
+import { nanoid } from "nanoid";
+
+export const ingestDocument = inngest.createFunction(
+  {
+    id: "ingest-document",
+    triggers: { event: "document/uploaded" },
+    retries: 2,
+  },
+  async ({ event, step }) => {
+    const { documentId } = event.data as { documentId: string };
+
+    // --- Step 1: parse ---
+    const parsed = await step.run("parse-document", async () => {
+      const document = await prisma.document.findUnique({ where: { id: documentId } });
+      if (!document) throw new Error("Document not found");
+
+      await prisma.document.update({ where: { id: documentId }, data: { status: "PARSING" } });
+
+      const buffer = await getFromStorage(document.storageUrl);
+      let text = "";
+
+      if (document.fileType === "pdf") {
+        const parser = new PDFParse({ data: buffer });
+        const result = await parser.getText();
+        text = result.text;
+      } else {
+        text = buffer.toString("utf-8");
+      }
+
+      if (!text.trim()) throw new Error("No extractable text found in this document");
+
+      return { text, chatbotId: document.chatbotId };
+    });
+
+    // --- Step 2: chunk ---
+    const chunks = await step.run("chunk-text", async () => chunkText(parsed.text));
+
+    // --- Step 3: embed + store ---
+    await step.run("embed-and-store", async () => {
+      await prisma.document.update({ where: { id: documentId }, data: { status: "EMBEDDING" } });
+
+      const BATCH_SIZE = 50;
+      let chunkIndex = 0;
+
+      for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+        const batch = chunks.slice(i, i + BATCH_SIZE);
+        const embeddings = await embedTexts(batch);
+
+        for (let j = 0; j < batch.length; j++) {
+          const content = batch[j];
+          const vectorLiteral = `[${embeddings[j].join(",")}]`;
+
+          await prisma.$executeRaw`
+            INSERT INTO "DocumentChunk" (id, "documentId", content, "chunkIndex", "tokenCount", embedding)
+            VALUES (${nanoid()}, ${documentId}, ${content}, ${chunkIndex}, ${Math.ceil(content.length / 4)}, ${vectorLiteral}::vector)
+          `;
+          chunkIndex++;
+        }
+      }
+
+      return { chunkCount: chunkIndex };
+    });
+
+    // --- Step 4: finalize ---
+    await step.run("finalize", async () => {
+      const document = await prisma.document.update({
+        where: { id: documentId },
+        data: { status: "READY", charCount: parsed.text.length },
+      });
+
+      const chatbot = await prisma.chatbot.findUnique({ where: { id: document.chatbotId } });
+      if (chatbot && chatbot.status !== "READY") {
+        await prisma.chatbot.update({ where: { id: chatbot.id }, data: { status: "READY" } });
+      }
+    });
+
+    return { success: true };
+  }
+);
+
+
+
+
+// Note on failure handling: if a step throws after retries are exhausted, the document will stay stuck in PARSING/EMBEDDING rather than flipping to FAILED — Inngest's onFailure callback API varies by version, so rather than give you code that might not match your installed version, flag this as a known gap we'll harden in a later "reliability" pass. For now you can manually check stuck documents via the Inngest dashboard (below).

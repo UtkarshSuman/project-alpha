@@ -189,7 +189,11 @@ model DocumentChunk {
   content     String   @db.Text
   chunkIndex  Int
   tokenCount  Int
-  embedding   Unsupported("vector(1536)")? // pgvector column
+  // FREE TIER: 384 dims (Xenova/all-MiniLM-L6-v2, local, no API cost).
+  // SWITCHING TO PAID: change to vector(1536) for OpenAI text-embedding-3-small,
+  // then run `npx prisma db push` — you'll also need to re-run ingestion on
+  // every existing document since old 384-dim vectors won't match a 1536 column.
+  embedding   Unsupported("vector(384)")? // pgvector column
 
   @@index([documentId])
 }
@@ -255,3 +259,7 @@ model Message {
 
   @@index([conversationId])
 }
+
+
+
+// database schema to store embedded data has been changed from 1536 to 384 need to be changed when move to paid services 

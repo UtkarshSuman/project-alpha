@@ -23,3 +23,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+
+
+
+
+
+
+
+// When  ready to go paid services
+
+// Set up Cloudflare R2 (needs card) and OpenAI billing (needs card).
+// Fill in the commented-out paid env vars.
+// Flip STORAGE_PROVIDER="s3" and EMBEDDINGS_PROVIDER="openai".
+
+
+// Change schema back to vector(1536), run npx prisma db push.
+
+
+// Re-upload/re-ingest existing documents — old 384-dim vectors are incompatible with the new column, so delete existing Document rows (cascades to chunks) and re-upload the same files.
+
+
+//  I can write you a one-off migration script for this when you get there, so you don't lose data unnecessarily.
+
+// npx prisma db push jabardasti kiya tha dusra wala padme issue create kar sakta hai
