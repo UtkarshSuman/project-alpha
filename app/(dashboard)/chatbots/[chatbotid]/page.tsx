@@ -1,13 +1,12 @@
-// FEATURE: Individual chatbot overview page — placeholder shell for now.
-// File upload UI, API key management, and settings tabs get added here
-// in the next sections (Upload/Ingestion, then API Keys).
-// FEATURE: Chatbot overview — now with real document upload + list
+// FEATURE: Chatbot overview — documents + API keys sections
+
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { requireOrg } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
 import { DocumentUpload } from "@/components/dashboard/document-upload";
 import { DocumentList } from "@/components/dashboard/document-list";
+import { ChatbotKeysSection } from "./keys-section";
 
 export default async function ChatbotOverviewPage({
   params,
@@ -31,7 +30,7 @@ export default async function ChatbotOverviewPage({
         <Badge status={chatbot.status} />
       </div>
       <p className="mt-2 text-sm text-muted">
-        {chatbot.documents.length} documents · {chatbot.apiKeys.length} API keys
+        {chatbot.documents.length} documents · {chatbot.apiKeys.filter((k) => k.isActive).length} API keys
       </p>
 
       <div className="mt-10">
@@ -40,6 +39,16 @@ export default async function ChatbotOverviewPage({
           <DocumentUpload chatbotid={chatbotid} />
           <DocumentList chatbotid={chatbotid} initialDocuments={chatbot.documents} />
         </div>
+      </div>
+
+      <div className="mt-10">
+        <ChatbotKeysSection
+          chatbotid={chatbotid}
+          initialKeys={chatbot.apiKeys.map((k) => ({
+            ...k,
+            lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
+          }))}
+        />
       </div>
     </div>
   );

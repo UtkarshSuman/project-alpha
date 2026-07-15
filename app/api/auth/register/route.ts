@@ -2,7 +2,7 @@
 // FEATURE: Registration endpoint — the piece the register page calls.
 //
 // - Validates input with zod (never trust client-side validation alone)
-// - Hashes password with bcrypt before storing (never store plaintext)
+// - Hashes password with bcrypt before storing
 // - Creates the User AND their Organization + OWNER Membership in one
 //   transaction, so a partial failure never leaves an orphaned user with
 //   no workspace (which would break the dashboard layout's org lookup)
