@@ -61,6 +61,3 @@ export async function retrieveRelevantChunks(
     }))
     .filter((r) => r.similarity >= SIMILARITY_THRESHOLD);
 }
-
-
-// sk_live_aac806ea64c84acb00c62225ed16b58d6e27aa6926a5c2f6
