@@ -8,6 +8,7 @@ import { DocumentUpload } from "@/components/dashboard/document-upload";
 import { DocumentList } from "@/components/dashboard/document-list";
 import { ChatbotKeysSection } from "./keys-section";
 import { OriginSettings } from "@/components/dashboard/origin-settings";
+import { ChatbotTabs } from "@/components/dashboard/chatbot-tabs";
 
 export default async function ChatbotOverviewPage({
   params,
@@ -34,6 +35,8 @@ export default async function ChatbotOverviewPage({
         {chatbot.documents.length} documents · {chatbot.apiKeys.filter((k) => k.isActive).length} API keys
       </p>
         
+      <ChatbotTabs chatbotid={chatbotid} /> 
+
       <div className="mt-10">
         <OriginSettings chatbotid={chatbotid} initialValue={chatbot.allowedOrigins ?? ""} />
       </div> 

@@ -25,7 +25,7 @@ export function Sidebar() {
       </div>
       <nav className="space-y-1 px-3">
         {links.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+          const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
           return (
             <Link
               key={href}
