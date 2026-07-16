@@ -19,6 +19,7 @@ import { validateApiKey } from "@/lib/auth/api-key";
 import { checkRateLimit, isOverMonthlyQuota } from "@/lib/auth/rate-limit";
 import { retrieveRelevantChunks } from "@/lib/ai/retrieve";
 import { generateChatCompletion } from "@/lib/ai/chat";
+import { isOriginAllowed } from "@/lib/security/origin-check";
 import { nanoid } from "nanoid";
 
 type RouteParams = { params: Promise<{ chatbotid: string }> };
@@ -51,6 +52,16 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     const chatbot = apiKey.chatbot;
     const org = chatbot.org;
+
+
+    // --- Origin restriction ---
+    const requestOrigin = req.headers.get("origin");
+    if (!isOriginAllowed(chatbot.allowedOrigins, requestOrigin)) {
+      return NextResponse.json(
+        { error: "This domain is not authorized to use this chatbot." },
+        { status: 403, headers: corsHeaders() }
+      );
+    }
 
     // --- Rate limit (per-minute burst protection) ---
     const rateLimit = await checkRateLimit(apiKey.id, org.plan);

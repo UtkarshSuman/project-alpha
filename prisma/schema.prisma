@@ -130,6 +130,12 @@ model Chatbot {
   widgetLogoUrl     String?
   welcomeMessage    String  @default("Hi! Ask me anything about this site.")
 
+  // FEATURE: Origin/domain restriction — comma-separated list of domains
+  // allowed to use this chatbot's API key (e.g. "example.com,shop.example.com").
+  // Empty/null means "no restriction" — useful during development/testing,
+  // but customers should be nudged to set this before going to production.
+  allowedOrigins String? @db.Text
+
   // Guardrails
   restrictToContext Boolean @default(true) // refuse to answer off-topic questions
   leadCaptureEnabled Boolean @default(false) // capture email when bot can't answer

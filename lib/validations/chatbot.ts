@@ -15,4 +15,5 @@ export const updateChatbotSchema = z.object({
   welcomeMessage: z.string().max(300).optional(),
   restrictToContext: z.boolean().optional(),
   leadCaptureEnabled: z.boolean().optional(),
+  allowedOrigins: z.string().max(1000).optional(),
 });
