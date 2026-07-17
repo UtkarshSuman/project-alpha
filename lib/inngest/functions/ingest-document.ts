@@ -20,6 +20,19 @@
 // instead of being a separate 2nd argument.
 // ============================================================================
 
+// ============================================================================
+// FEATURE: Document ingestion pipeline — now with failure handling +
+// idempotent embedding storage.
+//
+// RELIABILITY FIXES:
+// 1. onFailure: when all retries are exhausted, mark the document FAILED
+//    with a human-readable error message instead of leaving it stuck in
+//    PARSING/EMBEDDING forever with no way to recover.
+// 2. Idempotent embed-and-store: deletes any existing chunks for this
+//    document FIRST, so a retried step (or a manual re-ingestion) never
+//    produces duplicate chunks.
+// ============================================================================
+
 import { inngest } from "@/lib/inngest/client";
 import { prisma } from "@/lib/db/prisma";
 import { getFromStorage } from "@/lib/storage";
@@ -33,6 +46,36 @@ export const ingestDocument = inngest.createFunction(
     id: "ingest-document",
     triggers: { event: "document/uploaded" },
     retries: 2,
+
+    // Called once ALL retries are exhausted for any step. This is the safety
+    // net that prevents a document from being stuck forever with no signal
+    // to the user or a way to retry.
+    onFailure: async ({ event, error }) => {
+      const originalEvent = event.data.event;
+      const documentId = originalEvent?.data?.documentId as string | undefined;
+      if (!documentId) return;
+
+      const document = await prisma.document.findUnique({ where: { id: documentId } });
+      if (!document) return;
+
+      await prisma.document.update({
+        where: { id: documentId },
+        data: {
+          status: "FAILED",
+          errorMessage: error?.message?.slice(0, 500) ?? "Ingestion failed after retries.",
+        },
+      });
+
+      // If this was the chatbot's only/first document, flip it back to DRAFT
+      // rather than leaving it silently stuck on INGESTING with nothing ready.
+      const chatbot = await prisma.chatbot.findUnique({
+        where: { id: document.chatbotId },
+        include: { documents: { where: { status: "READY" } } },
+      });
+      if (chatbot && chatbot.status === "INGESTING" && chatbot.documents.length === 0) {
+        await prisma.chatbot.update({ where: { id: chatbot.id }, data: { status: "DRAFT" } });
+      }
+    },
   },
   async ({ event, step }) => {
     const { documentId } = event.data as { documentId: string };
@@ -42,7 +85,10 @@ export const ingestDocument = inngest.createFunction(
       const document = await prisma.document.findUnique({ where: { id: documentId } });
       if (!document) throw new Error("Document not found");
 
-      await prisma.document.update({ where: { id: documentId }, data: { status: "PARSING" } });
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { status: "PARSING", errorMessage: null },
+      });
 
       const buffer = await getFromStorage(document.storageUrl);
       let text = "";
@@ -63,9 +109,15 @@ export const ingestDocument = inngest.createFunction(
     // --- Step 2: chunk ---
     const chunks = await step.run("chunk-text", async () => chunkText(parsed.text));
 
-    // --- Step 3: embed + store ---
+    // --- Step 3: embed + store (idempotent) ---
     await step.run("embed-and-store", async () => {
       await prisma.document.update({ where: { id: documentId }, data: { status: "EMBEDDING" } });
+
+      // IDEMPOTENCY FIX: clear any chunks from a previous partial attempt
+      // (whether an Inngest-internal retry of this exact step, or a manual
+      // "retry ingestion" re-run) before inserting fresh ones. Without this,
+      // retries after a partial failure produce duplicate chunks.
+      await prisma.documentChunk.deleteMany({ where: { documentId } });
 
       const BATCH_SIZE = 50;
       let chunkIndex = 0;
@@ -93,7 +145,7 @@ export const ingestDocument = inngest.createFunction(
     await step.run("finalize", async () => {
       const document = await prisma.document.update({
         where: { id: documentId },
-        data: { status: "READY", charCount: parsed.text.length },
+        data: { status: "READY", charCount: parsed.text.length, errorMessage: null },
       });
 
       const chatbot = await prisma.chatbot.findUnique({ where: { id: document.chatbotId } });

@@ -4,8 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { requireOrg } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
-import { DocumentUpload } from "@/components/dashboard/document-upload";
-import { DocumentList } from "@/components/dashboard/document-list";
+import { DocumentsPanel } from "@/components/dashboard/documents-panel";
 import { ChatbotKeysSection } from "./keys-section";
 import { OriginSettings } from "@/components/dashboard/origin-settings";
 import { ChatbotTabs } from "@/components/dashboard/chatbot-tabs";
@@ -44,8 +43,7 @@ export default async function ChatbotOverviewPage({
       <div className="mt-10">
         <h2 className="font-display text-lg font-medium">Documents</h2>
         <div className="mt-4">
-          <DocumentUpload chatbotid={chatbotid} />
-          <DocumentList chatbotid={chatbotid} initialDocuments={chatbot.documents} />
+          <DocumentsPanel chatbotid={chatbotid} initialDocuments={chatbot.documents} />
         </div>
       </div>
 
