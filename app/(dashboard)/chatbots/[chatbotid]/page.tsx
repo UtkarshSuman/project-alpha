@@ -30,18 +30,14 @@ export default async function ChatbotOverviewPage({
         <h1 className="font-display text-2xl font-semibold">{chatbot.name}</h1>
         <Badge status={chatbot.status} />
       </div>
-      <p className="mt-2 text-sm text-muted">
-        {chatbot.documents.length} documents · {chatbot.apiKeys.filter((k) => k.isActive).length} API keys
-      </p>
-        
-      <ChatbotTabs chatbotid={chatbotid} /> 
+
+      <ChatbotTabs chatbotid={chatbotid} />
 
       <div className="mt-10">
         <OriginSettings chatbotid={chatbotid} initialValue={chatbot.allowedOrigins ?? ""} />
-      </div> 
+      </div>
 
       <div className="mt-10">
-        <h2 className="font-display text-lg font-medium">Documents</h2>
         <div className="mt-4">
           <DocumentsPanel chatbotid={chatbotid} initialDocuments={chatbot.documents} />
         </div>

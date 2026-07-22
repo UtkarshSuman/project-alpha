@@ -84,6 +84,13 @@ export function DocumentsPanel({ chatbotid, initialDocuments }: { chatbotid: str
 
   return (
     <div>
+      
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-lg font-medium">
+          Documents <span className="text-muted font-normal">({documents.length})</span>
+        </h2>
+      </div>
+
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}

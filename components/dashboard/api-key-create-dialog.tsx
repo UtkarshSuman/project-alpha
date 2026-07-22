@@ -2,26 +2,28 @@
 // FEATURE: Create API key dialog — shows the raw key AND the ready-to-paste
 // embed snippet, exactly once, matching how Stripe/OpenAI handle key
 // creation. ============================================================================
+
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { EmbedSnippet } from "@/components/dashboard/embed-snippet";
+import type { ApiKeyItem } from "@/components/dashboard/api-key-list";
 
 export function ApiKeyCreateDialog({
   chatbotid,
   open,
   onClose,
+  onCreated,
 }: {
   chatbotid: string;
   open: boolean;
   onClose: () => void;
+  onCreated: (key: ApiKeyItem) => void;
 }) {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [rawKey, setRawKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,13 @@ export function ApiKeyCreateDialog({
     if (res.ok) {
       const data = await res.json();
       setRawKey(data.apiKey.rawKey);
-      router.refresh();
+      onCreated({
+        id: data.apiKey.id,
+        name: data.apiKey.name,
+        keyPrefix: data.apiKey.keyPrefix,
+        isActive: true,
+        lastUsedAt: null,
+      });
     }
   }
 

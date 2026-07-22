@@ -1,11 +1,11 @@
-// FEATURE: API key list with revoke action
+// FEATURE: API key list with revoke and create action
+
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
-type ApiKeyItem = {
+export type ApiKeyItem = {
   id: string;
   name: string;
   keyPrefix: string;
@@ -13,15 +13,22 @@ type ApiKeyItem = {
   lastUsedAt: string | null;
 };
 
-export function ApiKeyList({ chatbotid, keys }: { chatbotid: string; keys: ApiKeyItem[] }) {
-  const router = useRouter();
+export function ApiKeyList({
+  chatbotid,
+  keys,
+  onRevoked,
+}: {
+  chatbotid: string;
+  keys: ApiKeyItem[];
+  onRevoked: (id: string) => void;
+}) {
   const [revoking, setRevoking] = useState<string | null>(null);
 
   async function handleRevoke(keyid: string) {
     setRevoking(keyid);
     await fetch(`/api/chatbots/${chatbotid}/keys/${keyid}`, { method: "DELETE" });
     setRevoking(null);
-    router.refresh();
+    onRevoked(keyid);
   }
 
   const activeKeys = keys.filter((k) => k.isActive);

@@ -69,7 +69,16 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const key = `chatbots/${chatbotid}/documents/${nanoid()}-${file.name}`;
-    await uploadToStorage(key, buffer, file.type);
+
+    try {
+      await uploadToStorage(key, buffer, file.type);
+    } catch (storageErr) {
+      console.error("Storage upload failed:", storageErr);
+      return NextResponse.json(
+        { error: "Could not upload file to storage. Check storage configuration." },
+        { status: 502 }
+      );
+    }
 
     const document = await prisma.document.create({
       data: {
