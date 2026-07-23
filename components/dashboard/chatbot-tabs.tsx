@@ -10,6 +10,7 @@ export function ChatbotTabs({ chatbotid }: { chatbotid: string }) {
   const tabs = [
     { href: `/chatbots/${chatbotid}`, label: "Overview" },
     { href: `/chatbots/${chatbotid}/analytics`, label: "Analytics" },
+    { href: `/chatbots/${chatbotid}/settings`, label: "Settings" },
   ];
 
   return (
