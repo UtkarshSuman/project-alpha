@@ -103,6 +103,7 @@ model Organization {
 
   memberships Membership[]
   chatbots    Chatbot[]
+  invites Invite[]
 }
 
 enum Plan {
@@ -266,6 +267,18 @@ model Message {
   @@index([conversationId])
 }
 
+model Invite {
+  id         String    @id @default(cuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email      String
+  role       Role      @default(MEMBER)
+  token      String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
 
+  @@index([orgId])
+}
 
 // database schema to store embedded data has been changed from 1536 to 384 need to be changed when move to paid services 
