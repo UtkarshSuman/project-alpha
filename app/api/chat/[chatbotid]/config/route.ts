@@ -4,12 +4,16 @@
 // Returns only branding/display fields (never system prompt or anything
 // sensitive) — the widget calls this once on load to render with the
 // customer's chosen title/color/welcome message.
+// Public widget config endpoint — force-dynamic + no-store so
+// branding changes take effect immediately, never served from cache.
 // ============================================================================
 
 
 import { NextResponse } from "next/server";
 import { validateApiKey } from "@/lib/auth/api-key";
 import { isOriginAllowed } from "@/lib/security/origin-check";
+
+export const dynamic = "force-dynamic";
 
 type RouteParams = { params: Promise<{ chatbotid: string }> };
 
@@ -43,6 +47,6 @@ export async function GET(req: Request, { params }: RouteParams) {
 
   return NextResponse.json(
     { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage },
-    { headers: corsHeaders() }
+    { headers: { ...corsHeaders(), "Cache-Control": "no-store" } }
   );
 }

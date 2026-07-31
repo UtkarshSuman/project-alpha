@@ -14,7 +14,14 @@ export default async function ChatbotsPage() {
   const chatbots = await prisma.chatbot.findMany({
     where: { orgId },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { documents: true, apiKeys: true } } },
+    include: {
+      _count: {
+        select: {
+          documents: true,
+          apiKeys: { where: { isActive: true } },
+        },
+      },
+    },
   });
 
   return <ChatbotsClient initialChatbots={chatbots} />;

@@ -1,5 +1,7 @@
 // FEATURE: Login page using NextAuth's credentials provider (signIn from
 // next-auth/react). Also shows a success banner after registration redirect.
+// Login page — honors callbackUrl so flows like invite
+// acceptance return the person to where they were headed, not always /dashboard.
 "use client";
 
 import { useState } from "react";
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const router = useRouter();
   const params = useSearchParams();
   const justRegistered = params.get("registered") === "1";
+  const callbackUrl = params.get("callbackUrl") || "/chatbots";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +36,7 @@ export default function LoginPage() {
       setError("Invalid email or password.");
       return;
     }
-    router.push("/dashboard");
+    router.push(callbackUrl);
   }
 
   return (
@@ -63,14 +66,17 @@ export default function LoginPage() {
       </form>
 
       <button
-        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+        onClick={() => signIn("google", { callbackUrl })}
         className="mt-3 w-full rounded-md border border-line py-2.5 text-sm text-text hover:bg-surface-hover"
       >
         Continue with Google
       </button>
 
       <p className="mt-6 text-center text-sm text-muted">
-        No account? <Link href="/register" className="text-accent-2">Create one</Link>
+        No account?{" "}
+        <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="text-accent-2">
+          Create one
+        </Link>
       </p>
     </>
   );

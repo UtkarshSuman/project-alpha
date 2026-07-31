@@ -34,10 +34,6 @@ export default async function ChatbotOverviewPage({
       <ChatbotTabs chatbotid={chatbotid} />
 
       <div className="mt-10">
-        <OriginSettings chatbotid={chatbotid} initialValue={chatbot.allowedOrigins ?? ""} />
-      </div>
-
-      <div className="mt-10">
         <div className="mt-4">
           <DocumentsPanel chatbotid={chatbotid} initialDocuments={chatbot.documents} />
         </div>

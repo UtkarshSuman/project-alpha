@@ -91,19 +91,19 @@ model Organization {
   name                 String
   createdAt            DateTime @default(now())
 
-  stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?  @unique
-  plan                 Plan     @default(FREE)
-  planStatus           String?  // active | past_due | canceled etc (mirrors Stripe)
-  currentPeriodEnd     DateTime?
+  // FEATURE: Razorpay billing fields 
+  razorpayCustomerId     String?  @unique
+  razorpaySubscriptionId String?  @unique
+  plan                   Plan     @default(FREE)
+  planStatus             String?  // created | authenticated | active | past_due | cancelled
+  currentPeriodEnd       DateTime?
 
-  // Monthly quota tracking (reset by a scheduled job)
   messageQuota         Int      @default(100)
   messagesUsedThisPeriod Int    @default(0)
 
   memberships Membership[]
   chatbots    Chatbot[]
-  invites Invite[]
+  invites     Invite[]
 }
 
 enum Plan {

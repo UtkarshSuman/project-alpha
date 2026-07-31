@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { registerSchema } from "@/lib/validations/auth";
+import { FREE_PLAN_MESSAGE_QUOTA } from "@/lib/billing/config";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
     await tx.organization.create({
       data: {
         name: `${name}'s Workspace`,
+        messageQuota: FREE_PLAN_MESSAGE_QUOTA,
         memberships: { create: { userId: user.id, role: "OWNER" } },
       },
     });

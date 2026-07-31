@@ -4,11 +4,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, Bot, Settings, CreditCard } from "lucide-react";
+import { LayoutGrid, Bot, Settings, CreditCard, Users } from "lucide-react";
 
 const links = [
   { href: "/dashboard", label: "Overview", icon: LayoutGrid },
   { href: "/chatbots", label: "Chatbots", icon: Bot },
+  { href: "/dashboard/team", label: "Team", icon: Users },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

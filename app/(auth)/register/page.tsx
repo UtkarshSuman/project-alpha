@@ -1,9 +1,9 @@
-// FEATURE: Registration page. Actual signup logic (API call) wired in the
-// API-routes section next — this posts to /api/auth/register (not yet built).
+// FEATURE: Registration page — preserves callbackUrl through to login so
+// invite links (and similar deep-links) survive the register -> login hop.
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const params = useSearchParams();
+  const callbackUrl = params.get("callbackUrl") || "/chatbots";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +39,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/login?registered=1");
+    router.push(`/login?registered=1&callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
   return (
@@ -60,13 +63,16 @@ export default function RegisterPage() {
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
-        <Button type="submit" className="w-full" onClick={undefined}>
+        <Button type="submit" className="w-full">
           {loading ? "Creating account..." : "Create account"}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
-        Already have an account? <Link href="/login" className="text-accent-2">Sign in</Link>
+        Already have an account?{" "}
+        <Link href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="text-accent-2">
+          Sign in
+        </Link>
       </p>
     </>
   );
