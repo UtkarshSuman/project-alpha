@@ -11,6 +11,7 @@ import { requireOrg, requireOrgRole, UnauthorizedError, ForbiddenError } from "@
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { Role } from "@prisma/client";
+import { sendInviteEmail } from "@/lib/email/send-invite-email";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -55,6 +56,19 @@ export async function POST(req: Request) {
 
     const invite = await prisma.invite.create({
       data: { orgId, email: parsed.data.email, role: parsed.data.role, token, expiresAt },
+    });
+
+    
+    // Best-effort email send — failure here doesn't fail the request, since
+    // the invite (and its shareable link, returned below) already exists
+    // and works regardless of whether the email arrives.
+    const org = await prisma.organization.findUnique({ where: { id: orgId } });
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const emailResult = await sendInviteEmail({
+      to: parsed.data.email,
+      orgName: org?.name ?? "a workspace",
+      inviteUrl: `${appUrl}/invite/${token}`,
+      role: parsed.data.role,
     });
 
     return NextResponse.json({ invite }, { status: 201 });

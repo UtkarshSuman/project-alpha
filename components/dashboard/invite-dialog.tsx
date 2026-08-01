@@ -22,6 +22,7 @@ export function InviteDialog({ open, onClose }: { open: boolean; onClose: () => 
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailWasSent, setEmailWasSent] = useState(false);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -42,8 +43,9 @@ export function InviteDialog({ open, onClose }: { open: boolean; onClose: () => 
       return;
     }
 
-    const { invite } = await res.json();
+    const { invite, emailSent } = await res.json();
     setLink(`${window.location.origin}/invite/${invite.token}`);
+    setEmailWasSent(emailSent);
     router.refresh();
   }
 
@@ -79,7 +81,11 @@ export function InviteDialog({ open, onClose }: { open: boolean; onClose: () => 
         </form>
       ) : (
         <div>
-          <p className="mb-3 text-sm text-muted">Send this link to {email} — it expires in 7 days.</p>
+          <p className="mb-3 text-sm text-muted">
+            {emailWasSent
+              ? `An email was sent to ${email}. You can also share this link directly:`
+              : `Couldn't send an email automatically — share this link with ${email} directly:`}
+          </p>
           <div className="flex items-center gap-2 rounded-md border border-line bg-ink px-3 py-2 text-xs text-text">
             <span className="flex-1 truncate">{link}</span>
             <button
