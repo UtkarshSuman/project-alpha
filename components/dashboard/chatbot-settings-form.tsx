@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { WidgetThemePicker } from "@/components/dashboard/widget-theme-picker";
 
 type ChatbotSettings = {
   name: string;
@@ -17,6 +18,8 @@ type ChatbotSettings = {
   widgetTitle: string;
   widgetColor: string;
   widgetLogoUrl: string | null;
+  widgetPosition: string;
+  widgetTheme: string;
   welcomeMessage: string;
   restrictToContext: boolean;
   leadCaptureEnabled: boolean;
@@ -132,6 +135,13 @@ export function ChatbotSettingsForm({ chatbotid, initial }: { chatbotid: string;
             />
           </div>
         </div>
+        <WidgetThemePicker
+          theme={form.widgetTheme}
+          position={form.widgetPosition}
+          color={form.widgetColor}
+          onThemeChange={(theme) => update("widgetTheme", theme)}
+          onPositionChange={(position) => update("widgetPosition", position)}
+        />
       </div>
 
       {/* --- Guardrails --- */}

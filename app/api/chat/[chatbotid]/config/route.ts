@@ -8,12 +8,11 @@
 // branding changes take effect immediately, never served from cache.
 // ============================================================================
 
+export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { validateApiKey } from "@/lib/auth/api-key";
 import { isOriginAllowed } from "@/lib/security/origin-check";
-
-export const dynamic = "force-dynamic";
 
 type RouteParams = { params: Promise<{ chatbotid: string }> };
 
@@ -37,16 +36,13 @@ export async function GET(req: Request, { params }: RouteParams) {
 
   const requestOrigin = req.headers.get("origin");
   if (!isOriginAllowed(apiKey.chatbot.allowedOrigins, requestOrigin)) {
-    return NextResponse.json(
-      { error: "This domain is not authorized to use this chatbot." },
-      { status: 403, headers: corsHeaders() }
-    );
+    return NextResponse.json({ error: "This domain is not authorized." }, { status: 403, headers: corsHeaders() });
   }
 
-  const { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage } = apiKey.chatbot;
+  const { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme } = apiKey.chatbot;
 
   return NextResponse.json(
-    { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage },
+    { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme },
     { headers: { ...corsHeaders(), "Cache-Control": "no-store" } }
   );
 }

@@ -13,6 +13,8 @@ export const updateChatbotSchema = z.object({
   widgetTitle: z.string().max(60).optional(),
   widgetColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color").optional(),
   widgetLogoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  widgetPosition: z.enum(["bottom-right", "bottom-left"]).optional(),
+  widgetTheme: z.enum(["classic", "minimal", "rounded", "compact", "bold"]).optional(),
   welcomeMessage: z.string().max(300).optional(),
   restrictToContext: z.boolean().optional(),
   leadCaptureEnabled: z.boolean().optional(),

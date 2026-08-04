@@ -32,6 +32,8 @@ export default async function ChatbotSettingsPage({
           widgetTitle: chatbot.widgetTitle,
           widgetColor: chatbot.widgetColor,
           widgetLogoUrl: chatbot.widgetLogoUrl,
+          widgetPosition: chatbot.widgetPosition,
+          widgetTheme: chatbot.widgetTheme,
           welcomeMessage: chatbot.welcomeMessage,
           restrictToContext: chatbot.restrictToContext,
           leadCaptureEnabled: chatbot.leadCaptureEnabled,
