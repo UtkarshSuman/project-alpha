@@ -123,11 +123,18 @@ export async function POST(req: Request, { params }: RouteParams) {
       await prisma.$transaction([
         prisma.message.create({ data: { conversationId: conversation.id, role: "user", content: message } }),
         prisma.message.create({
-          data: { conversationId: conversation.id, role: "assistant", content: fallback, wasAnswered: false },
+          data: { conversationId: conversation.id, role: "assistant", content: fallback, wasAnswered: false, relatedQuestion: message,  },
         }),
       ]);
+      // relatedQuestion: message, it pin the exact question to this specific fallback
 
-      return NextResponse.json({ reply: fallback, sessionId }, { headers: corsHeaders() });
+      // Signal the widget to show an email capture form if this chatbot has
+      // lead capture enabled AND we haven't already captured this visitor's
+      // email in this conversation.
+      const shouldRequestEmail = chatbot.leadCaptureEnabled && !conversation.visitorEmail;
+
+    
+      return NextResponse.json({ reply: fallback, sessionId, requestEmail: shouldRequestEmail }, { headers: corsHeaders() });
     }
 
     // --- Build grounded system prompt ---

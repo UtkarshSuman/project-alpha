@@ -130,6 +130,8 @@ model Chatbot {
   widgetColor       String  @default("#6366f1")
   widgetLogoUrl     String?
   welcomeMessage    String  @default("Hi! Ask me anything about this site.")
+  widgetPosition String @default("bottom-right") // "bottom-right" | "bottom-left"
+  widgetTheme    String @default("classic")      // "classic" | "minimal" | "rounded" | "compact" | "bold"
 
   // FEATURE: Origin/domain restriction — comma-separated list of domains
   // allowed to use this chatbot's API key (e.g. "example.com,shop.example.com").
@@ -248,6 +250,10 @@ model Conversation {
   visitorEmail String? // captured via lead-capture flow
   createdAt   DateTime @default(now())
 
+  // the specific question the visitor was asking when they
+  // submitted their email  captured directly from the widget, not reconstructed later.
+  leadQuestion String? @db.Text
+
   messages    Message[]
 
   @@index([chatbotId, createdAt])
@@ -262,6 +268,14 @@ model Message {
   content        String   @db.Text
   wasAnswered    Boolean  @default(true) // false if low-confidence/fallback triggered
   feedback       Int?     // 1 = thumbs up, -1 = thumbs down, null = no feedback
+
+  // stores the exact user question that triggered THIS fallback
+  // message, set at creation time fixes a bug where the analytics page
+  // was reconstructing "which question" by grabbing the conversation's
+  // most recent user message, which silently changed as new messages
+  // arrived in the same conversation.
+  relatedQuestion String? @db.Text
+
   createdAt      DateTime @default(now())
 
   @@index([conversationId])

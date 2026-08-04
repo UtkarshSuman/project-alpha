@@ -113,6 +113,50 @@
       return el;
     }
 
+    function addEmailCapture(question) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg assistant";
+      wrapper.style.width = "100%";
+      wrapper.style.maxWidth = "100%";
+      wrapper.innerHTML = `
+        <p style="margin: 0 0 8px;">Want us to follow up? Leave your email:</p>
+        <div style="display: flex; gap: 6px;">
+          <input type="email" placeholder="you@example.com"
+                 style="flex: 1; border: 1px solid #e5e5e8; border-radius: 6px; padding: 6px 8px; font-size: 12px; outline: none;" />
+          <button style="background: var(--accent, #6366f1); color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">
+            Send
+          </button>
+        </div>
+      `;
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      const emailInput = wrapper.querySelector("input");
+      const submitBtn = wrapper.querySelector("button");
+
+      async function submitEmail() {
+        const email = emailInput.value.trim();
+        if (!email || !email.includes("@")) return;
+        submitBtn.disabled = true;
+
+        try {
+          await fetch(`${apiBase}/api/chat/${chatbotId}/lead`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+            body: JSON.stringify({ sessionId, email, question }),
+          });
+          wrapper.innerHTML = `<p style="margin: 0; color: #4fd1c5;">Thanks — we'll be in touch!</p>`;
+        } catch {
+          submitBtn.disabled = false;
+        }
+      }
+
+      submitBtn.addEventListener("click", submitEmail);
+      emailInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") submitEmail();
+      });
+    }
+
     async function sendMessage() {
       const text = inputEl.value.trim();
       if (!text) return;
@@ -136,6 +180,7 @@
         } else {
           sessionId = data.sessionId;
           addMessage("assistant", data.reply);
+          if (data.requestEmail) addEmailCapture(text);
         }
       } catch (err) {
         loadingEl.remove();

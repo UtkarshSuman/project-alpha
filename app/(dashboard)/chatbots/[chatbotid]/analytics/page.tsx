@@ -1,11 +1,12 @@
 // ============================================================================
 // FEATURE: Analytics dashboard for a single chatbot
-// - Summary cards: total conversations, total messages, unanswered rate,
+// - Summary cards: total conversations, total messages, unanswered questions, unanswered rate,
 //   avg response latency
 // - Bar chart: messages per day, last 14 days
 // - List: questions that triggered the "I don't know" fallback — tells the
 //   customer exactly what content gaps exist in their uploaded docs
 // ============================================================================
+
 
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
@@ -14,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChatbotTabs } from "@/components/dashboard/chatbot-tabs";
 import { AnalyticsChart } from "@/components/dashboard/analytics-chart";
 import { UnansweredQuestions } from "@/components/dashboard/unanswered-questions";
+import { LeadsList } from "@/components/dashboard/leads-list";
 
 type DailyCountRow = { day: Date; count: bigint };
 
@@ -28,7 +30,7 @@ export default async function AnalyticsPage({
   const chatbot = await prisma.chatbot.findUnique({ where: { id: chatbotid } });
   if (!chatbot || chatbot.orgId !== orgId) notFound();
 
-  const [conversationCount, messageCount, unansweredCount, avgLatency, dailyCounts, unansweredMessages] =
+  const [conversationCount, messageCount, unansweredCount, avgLatency, dailyCounts, unansweredMessages, leads] =
     await Promise.all([
       prisma.conversation.count({ where: { chatbotId: chatbotid } }),
       prisma.message.count({
@@ -41,8 +43,6 @@ export default async function AnalyticsPage({
         where: { apiKey: { chatbotId: chatbotid } },
         _avg: { latencyMs: true },
       }),
-      // Raw SQL: date_trunc/day-bucketing isn't expressible through Prisma's
-      // query builder, so this is a raw aggregate query.
       prisma.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', m."createdAt") AS day, COUNT(*) AS count
         FROM "Message" m
@@ -53,11 +53,20 @@ export default async function AnalyticsPage({
         GROUP BY day
         ORDER BY day ASC
       `,
+      // Simplified: select relatedQuestion directly off each fallback
+      // message — no join/include needed, and each row is guaranteed to
+      // show its OWN triggering question, not the conversation's latest.
       prisma.message.findMany({
         where: { conversation: { chatbotId: chatbotid }, role: "assistant", wasAnswered: false },
         orderBy: { createdAt: "desc" },
         take: 10,
-        include: { conversation: { include: { messages: { where: { role: "user" }, take: 1, orderBy: { createdAt: "desc" } } } } },
+        select: { relatedQuestion: true, content: true, createdAt: true },
+      }),
+      prisma.conversation.findMany({
+        where: { chatbotId: chatbotid, visitorEmail: { not: null } },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: { visitorEmail: true, leadQuestion: true, createdAt: true },
       }),
     ]);
 
@@ -68,9 +77,8 @@ export default async function AnalyticsPage({
 
   const unansweredRate = messageCount > 0 ? Math.round((unansweredCount / messageCount) * 100) : 0;
 
-  // Pull the user's actual question that preceded each unanswered fallback
   const unansweredItems = unansweredMessages.map((m) => ({
-    content: m.conversation.messages[0]?.content ?? "(question unavailable)",
+    content: m.relatedQuestion ?? "(question unavailable — asked before this fix)",
     createdAt: m.createdAt.toISOString(),
   }));
 
@@ -107,6 +115,17 @@ export default async function AnalyticsPage({
       <div className="mt-8">
         <h2 className="font-display mb-3 text-lg font-medium">Unanswered questions</h2>
         <UnansweredQuestions items={unansweredItems} />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-display mb-3 text-lg font-medium">Captured leads</h2>
+        <LeadsList
+          leads={leads.map((l) => ({
+            visitorEmail: l.visitorEmail!,
+            question: l.leadQuestion,
+            createdAt: l.createdAt.toISOString(),
+          }))}
+        />
       </div>
     </div>
   );
