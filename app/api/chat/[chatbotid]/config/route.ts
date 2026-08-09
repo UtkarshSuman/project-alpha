@@ -39,10 +39,10 @@ export async function GET(req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "This domain is not authorized." }, { status: 403, headers: corsHeaders() });
   }
 
-  const { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme } = apiKey.chatbot;
+  const { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme, widgetSize } = apiKey.chatbot;
 
   return NextResponse.json(
-    { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme },
+    { widgetTitle, widgetColor, widgetLogoUrl, welcomeMessage, widgetPosition, widgetTheme, widgetSize },
     { headers: { ...corsHeaders(), "Cache-Control": "no-store" } }
   );
 }

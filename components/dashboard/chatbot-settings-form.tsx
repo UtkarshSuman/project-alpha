@@ -23,6 +23,7 @@ type ChatbotSettings = {
   welcomeMessage: string;
   restrictToContext: boolean;
   leadCaptureEnabled: boolean;
+  widgetSize: string;
 };
 
 export function ChatbotSettingsForm({ chatbotid, initial }: { chatbotid: string; initial: ChatbotSettings }) {
@@ -136,12 +137,14 @@ export function ChatbotSettingsForm({ chatbotid, initial }: { chatbotid: string;
           </div>
         </div>
         <WidgetThemePicker
-          theme={form.widgetTheme}
-          position={form.widgetPosition}
-          color={form.widgetColor}
-          onThemeChange={(theme) => update("widgetTheme", theme)}
-          onPositionChange={(position) => update("widgetPosition", position)}
-        />
+            theme={form.widgetTheme}
+            position={form.widgetPosition}
+            size={form.widgetSize}
+            color={form.widgetColor}
+            onThemeChange={(theme) => update("widgetTheme", theme)}
+            onPositionChange={(position) => update("widgetPosition", position)}
+            onSizeChange={(size) => update("widgetSize", size)}
+          />
       </div>
 
       {/* --- Guardrails --- */}

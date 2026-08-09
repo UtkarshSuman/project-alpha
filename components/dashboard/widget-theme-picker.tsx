@@ -3,6 +3,10 @@
 // instead of a full design editor. Each card renders a small mock preview
 // using real CSS so customers see an approximation before saving.
 // ============================================================================
+// ============================================================================
+// FEATURE: Visual theme + position + size picker — preset click-to-select
+// cards instead of a full design editor.
+// ============================================================================
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -20,18 +24,28 @@ const POSITIONS = [
   { id: "bottom-left", label: "Bottom left" },
 ] as const;
 
+const SIZES = [
+  { id: "small", label: "Small" },
+  { id: "medium", label: "Medium" },
+  { id: "large", label: "Large" },
+] as const;
+
 export function WidgetThemePicker({
   theme,
   position,
+  size,
   color,
   onThemeChange,
   onPositionChange,
+  onSizeChange,
 }: {
   theme: string;
   position: string;
+  size: string;
   color: string;
   onThemeChange: (theme: string) => void;
   onPositionChange: (position: string) => void;
+  onSizeChange: (size: string) => void;
 }) {
   return (
     <div>
@@ -70,6 +84,24 @@ export function WidgetThemePicker({
             )}
           >
             {p.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="mb-2 mt-5 text-sm text-text">Size</p>
+      <p className="mb-2 text-xs text-muted">Applies across desktop, tablet, and mobile — each scales proportionally.</p>
+      <div className="flex gap-3">
+        {SIZES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => onSizeChange(s.id)}
+            className={cn(
+              "rounded-md border px-4 py-2 text-xs",
+              size === s.id ? "border-accent bg-surface text-text" : "border-line bg-surface text-muted hover:text-text"
+            )}
+          >
+            {s.label}
           </button>
         ))}
       </div>
