@@ -15,6 +15,7 @@ export const updateChatbotSchema = z.object({
   widgetLogoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   widgetPosition: z.enum(["bottom-right", "bottom-left"]).optional(),
   widgetTheme: z.enum(["classic", "minimal", "rounded", "compact", "bold"]).optional(),
+  widgetSize: z.enum(["small", "medium", "large"]).optional(),
   welcomeMessage: z.string().max(300).optional(),
   restrictToContext: z.boolean().optional(),
   leadCaptureEnabled: z.boolean().optional(),

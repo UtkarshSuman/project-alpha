@@ -57,6 +57,9 @@ export default function LoginPage() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
+          <div className="mt-1.5 text-right">
+            <Link href="/forgot-password" className="text-xs text-accent-2">Forgot password?</Link>
+          </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 

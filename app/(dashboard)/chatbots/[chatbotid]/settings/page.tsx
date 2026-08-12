@@ -37,6 +37,7 @@ export default async function ChatbotSettingsPage({
           welcomeMessage: chatbot.welcomeMessage,
           restrictToContext: chatbot.restrictToContext,
           leadCaptureEnabled: chatbot.leadCaptureEnabled,
+          widgetSize: chatbot.widgetSize,
         }}
       />
 

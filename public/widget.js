@@ -8,7 +8,7 @@
 // script tag on any website" actually reliable in practice.
 // ============================================================================
 // ============================================================================
-// FEATURE: Docent embeddable chat widget
+
 // Fetches branding config FIRST, then builds the DOM — avoids the flash of
 // default blue color before the real widgetColor loads in.
 // - Responsive: panel becomes a near-fullscreen bottom sheet on small
@@ -25,11 +25,17 @@
 // - Themes: 5 visual presets (classic/minimal/rounded/compact/bold),
 //   applied via CSS custom properties + a theme class on the host.
 // ============================================================================
+// ============================================================================
+// FEATURE: Docent embeddable chat widget
+// - THEMES now controls only visual style (shape/shadow/border), not size
+// - SIZES controls actual dimensions, independently, across 3 breakpoints:
+//   desktop (default), tablet (<=900px), mobile (<=480px, full bottom sheet)
+// ============================================================================
 (function () {
   const scriptTag = document.currentScript;
   const chatbotId = scriptTag.getAttribute("data-chatbot-id");
   const apiKey = scriptTag.getAttribute("data-api-key");
-  const apiBase = scriptTag.getAttribute("data-api-base") || "https://app.com";
+  const apiBase = scriptTag.getAttribute("data-api-base") || "https://yourapp.com";
 
   if (!chatbotId || !apiKey) {
     console.error("[Docent widget] Missing data-chatbot-id or data-api-key");
@@ -38,14 +44,20 @@
 
   let sessionId = null;
 
-  // Per-theme visual tokens — each overrides radius/shadow/spacing on top
-  // of the shared base styles below.
+  // Visual style ONLY — no dimensions here anymore.
   const THEMES = {
-    classic: { radius: "12px", bubbleRadius: "50%", shadow: "0 10px 40px rgba(0,0,0,0.2)", headerPad: "14px 16px", panelW: 360, panelH: 500 },
-    minimal: { radius: "4px", bubbleRadius: "4px", shadow: "0 1px 3px rgba(0,0,0,0.15)", headerPad: "12px 14px", panelW: 340, panelH: 480, border: "1px solid #e5e5e8" },
-    rounded: { radius: "26px", bubbleRadius: "50%", shadow: "0 12px 44px rgba(0,0,0,0.22)", headerPad: "18px 20px", panelW: 370, panelH: 520 },
-    compact: { radius: "10px", bubbleRadius: "50%", shadow: "0 8px 28px rgba(0,0,0,0.18)", headerPad: "10px 14px", panelW: 300, panelH: 420, fontScale: "0.92" },
-    bold: { radius: "14px", bubbleRadius: "50%", shadow: "0 14px 48px rgba(0,0,0,0.28)", headerPad: "18px 18px", panelW: 380, panelH: 540, headerFontWeight: "800", bubbleSize: 62 },
+    classic: { radius: "12px", bubbleRadius: "50%", shadow: "0 10px 40px rgba(0,0,0,0.2)", headerPad: "14px 16px" },
+    minimal: { radius: "4px", bubbleRadius: "4px", shadow: "0 1px 3px rgba(0,0,0,0.15)", headerPad: "12px 14px", border: "1px solid #e5e5e8" },
+    rounded: { radius: "26px", bubbleRadius: "50%", shadow: "0 12px 44px rgba(0,0,0,0.22)", headerPad: "18px 20px" },
+    compact: { radius: "10px", bubbleRadius: "50%", shadow: "0 8px 28px rgba(0,0,0,0.18)", headerPad: "10px 14px", fontScale: "0.92" },
+    bold: { radius: "14px", bubbleRadius: "50%", shadow: "0 14px 48px rgba(0,0,0,0.28)", headerPad: "18px 18px", headerFontWeight: "800" },
+  };
+
+  // Dimensions ONLY, per breakpoint — independent of theme.
+  const SIZES = {
+    small:  { bubble: 48, desktopW: 320, desktopH: 460, tabletW: 340, tabletH: 480, mobileVh: 72 },
+    medium: { bubble: 60, desktopW: 400, desktopH: 580, tabletW: 380, tabletH: 540, mobileVh: 85 },
+    large:  { bubble: 72, desktopW: 460, desktopH: 660, tabletW: 420, tabletH: 600, mobileVh: 92 },
   };
 
   async function init() {
@@ -55,21 +67,49 @@
       welcomeMessage: "Hi! Ask me anything.",
       widgetPosition: "bottom-right",
       widgetTheme: "classic",
+      widgetSize: "medium",
     };
+    let configError = null;
     try {
       const res = await fetch(`${apiBase}/api/chat/${chatbotId}/config`, {
         headers: { Authorization: `Bearer ${apiKey}` },
         cache: "no-store",
       });
       const data = await res.json();
-      if (!data.error) config = { ...config, ...data };
+      if (data.error) {
+        configError = data.error;
+      } else {
+        config = { ...config, ...data };
+      }
     } catch {
-      // fall back to defaults silently
+      configError = "Unable to connect. Please try again later.";
+    }
+
+    // If the chatbot/key is invalid, don't render a broken-looking full
+    // widget — show a minimal, honest bubble+message instead of pretending
+    // everything is fine.
+    if (configError) {
+      const host = document.createElement("div");
+      host.id = "docent-widget-root";
+      document.body.appendChild(host);
+      const shadow = host.attachShadow({ mode: "open" });
+      shadow.innerHTML = `
+        <style>
+          .err-bubble {
+            position: fixed; bottom: 20px; right: 20px; background: #1a1a1a; color: #fff;
+            padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: -apple-system, sans-serif;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2); z-index: 999999; max-width: 240px;
+          }
+        </style>
+        <div class="err-bubble">Chat is temporarily unavailable.</div>
+      `;
+      console.error("[Docent widget]", configError);
+      return;
     }
 
     const theme = THEMES[config.widgetTheme] || THEMES.classic;
+    const size = SIZES[config.widgetSize] || SIZES.medium;
     const isLeft = config.widgetPosition === "bottom-left";
-    const bubbleSize = theme.bubbleSize || 56;
 
     const host = document.createElement("div");
     host.id = "docent-widget-root";
@@ -83,17 +123,17 @@
 
       .bubble {
         position: fixed; bottom: 20px; ${isLeft ? "left: 20px;" : "right: 20px;"}
-        width: ${bubbleSize}px; height: ${bubbleSize}px;
+        width: ${size.bubble}px; height: ${size.bubble}px;
         border-radius: ${theme.bubbleRadius}; background: var(--accent, #6366f1); border: none;
         cursor: pointer; box-shadow: ${theme.shadow}; z-index: 999999;
         display: flex; align-items: center; justify-content: center;
       }
-      .bubble svg { width: 26px; height: 26px; fill: white; }
+      .bubble svg { width: ${Math.round(size.bubble * 0.46)}px; height: ${Math.round(size.bubble * 0.46)}px; fill: white; }
 
       .panel {
-        position: fixed; bottom: 88px; ${isLeft ? "left: 20px;" : "right: 20px;"}
-        width: ${theme.panelW}px; max-width: calc(100vw - 40px);
-        height: ${theme.panelH}px; max-height: calc(100vh - 120px);
+        position: fixed; bottom: ${size.bubble + 16}px; ${isLeft ? "left: 20px;" : "right: 20px;"}
+        width: ${size.desktopW}px; max-width: calc(100vw - 40px);
+        height: ${size.desktopH}px; max-height: calc(100vh - 120px);
         background: #fff; border-radius: ${theme.radius};
         box-shadow: ${theme.shadow}; ${theme.border ? `border: ${theme.border};` : ""}
         display: none; flex-direction: column; overflow: hidden; z-index: 999999;
@@ -124,15 +164,27 @@
       }
       .input-row button:disabled { opacity: 0.5; cursor: default; }
 
-      /* RESPONSIVE: on small screens, the panel becomes a near-fullscreen
-         bottom sheet instead of a fixed box that would overflow or look
-         cramped on a phone. */
+      /* TABLET breakpoint: slightly smaller than desktop, still floating
+         (not full-screen) — tablets have room for a real panel, just less
+         of it than a laptop. */
+      @media (max-width: 900px) {
+        .panel {
+          width: ${size.tabletW}px; height: ${size.tabletH}px;
+        }
+      }
+
+      /* MOBILE breakpoint: full-width bottom sheet, height scales with the
+         chosen size (small/medium/large) via mobileVh, since a fixed pixel
+         panel doesn't make sense once we're already going full-width. */
       @media (max-width: 480px) {
         .panel {
-          width: 100vw; height: 85vh; max-width: 100vw; max-height: 85vh;
+          width: 100vw; height: ${size.mobileVh}vh; max-width: 100vw; max-height: ${size.mobileVh}vh;
           bottom: 0; left: 0; right: 0; border-radius: ${theme.radius} ${theme.radius} 0 0;
         }
-        .bubble { bottom: 16px; ${isLeft ? "left: 16px;" : "right: 16px;"} }
+        .bubble {
+          width: ${Math.round(size.bubble * 0.9)}px; height: ${Math.round(size.bubble * 0.9)}px;
+          bottom: 16px; ${isLeft ? "left: 16px;" : "right: 16px;"}
+        }
       }
     `;
     shadow.appendChild(style);
