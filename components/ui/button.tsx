@@ -10,6 +10,7 @@ type ButtonProps = {
   className?: string;
   onClick?: () => void;
   type?: "button" | "submit";
+  disabled?: boolean;
 };
 
 const variants = {
