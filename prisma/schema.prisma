@@ -20,6 +20,7 @@ model User {
   accounts     Account[]
   memberships  Membership[]
   sessions     Session[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Membership {
@@ -225,4 +226,17 @@ enum DocumentStatus {
   EMBEDDING
   READY
   FAILED
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

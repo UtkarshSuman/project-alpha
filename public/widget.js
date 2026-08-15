@@ -129,6 +129,8 @@
         display: flex; align-items: center; justify-content: center;
       }
       .bubble svg { width: ${Math.round(size.bubble * 0.46)}px; height: ${Math.round(size.bubble * 0.46)}px; fill: white; }
+      .bubble img { display: block; }
+      .bubble { padding: 0; overflow: hidden; }
 
       .panel {
         position: fixed; bottom: ${size.bubble + 16}px; ${isLeft ? "left: 20px;" : "right: 20px;"}
@@ -191,14 +193,22 @@
 
     const bubble = document.createElement("button");
     bubble.className = "bubble";
-    bubble.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.4 1.05 4.57 2.77 6.19L4 22l5.05-1.35c.94.24 1.93.35 2.95.35 5.52 0 10-4.02 10-9S17.52 2 12 2z"/></svg>`;
+    if (config.widgetLogoUrl) {
+      // Custom logo: fill the bubble with the image instead of the default icon
+      bubble.innerHTML = `<img src="${config.widgetLogoUrl}" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: ${theme.bubbleRadius};" />`;
+    } else {
+      bubble.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.4 1.05 4.57 2.77 6.19L4 22l5.05-1.35c.94.24 1.93.35 2.95.35 5.52 0 10-4.02 10-9S17.52 2 12 2z"/></svg>`;
+    }
     shadow.appendChild(bubble);
 
     const panel = document.createElement("div");
     panel.className = "panel";
     panel.innerHTML = `
       <div class="header">
-        <span>${config.widgetTitle}</span>
+        <span style="display: flex; align-items: center; gap: 8px;">
+          ${config.widgetLogoUrl ? `<img src="${config.widgetLogoUrl}" alt="" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover;" />` : ""}
+          ${config.widgetTitle}
+        </span>
         <button class="close-btn" aria-label="Close">&times;</button>
       </div>
       <div class="messages"></div>
