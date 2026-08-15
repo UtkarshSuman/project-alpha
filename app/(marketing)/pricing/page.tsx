@@ -3,12 +3,28 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { FREE_PLAN_ENABLED, FREE_PLAN_MESSAGE_QUOTA } from "@/lib/billing/config";
 
-const plans = [
-  { name: "Free", price: "$0", quota: `${FREE_PLAN_MESSAGE_QUOTA.toLocaleString()} messages/mo`, features: ["1 chatbot", "1 document", "Community support"] },
+type Plan = {
+  name: string;
+  price: string;
+  quota: string;
+  features: string[];
+  highlighted?: boolean;
+  unavailable?: boolean;
+};
+
+const plans: Plan[] = [
+  {
+    name: "Free",
+    price: "$0",
+    quota: `${FREE_PLAN_MESSAGE_QUOTA.toLocaleString()} messages/mo`,
+    features: ["1 chatbot", "1 document", "Community support"],
+    unavailable: !FREE_PLAN_ENABLED,
+  },
   { name: "Starter", price: "$29", quota: "2,000 messages/mo", features: ["5 chatbots", "10 documents each", "Email support", "Remove branding"] },
   { name: "Pro", price: "$99", quota: "10,000 messages/mo", features: ["Unlimited chatbots", "Unlimited documents", "Priority support", "Analytics dashboard"], highlighted: true },
   { name: "Scale", price: "Custom", quota: "Custom volume", features: ["Dedicated infra", "SLA", "SSO", "Custom model routing"] },
 ];
+
 
 export default function PricingPage() {
   return (
