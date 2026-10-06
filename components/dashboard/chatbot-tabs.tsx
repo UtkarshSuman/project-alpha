@@ -2,7 +2,15 @@
 // FEATURE: Tab navigation within a single chatbot's detail views
 // Migrated to sliding underline indicator measured from active tab DOM position.
 // Includes Overview, Playground, Analytics, and Settings.
+// long-term chatbot detail pages all share ONE component instead of three
+// near-identical copies (exactly the pattern that caused repeated bugs today).
+// FEATURE: Tab navigation with sliding underline indicator — now parameterized
+// with basePath + extraTabs so simple/short-term/long-term chatbot detail
+// pages all share this ONE component instead of near-duplicate copies.
+// extraTabs (e.g. "Memories" for long-term chatbots) get inserted before
+// Settings, which always stays last.
 // ============================================================================
+
 
 "use client";
 
@@ -11,20 +19,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function ChatbotTabs({ chatbotid }: { chatbotid: string }) {
+export function ChatbotTabs({
+  chatbotid,
+  basePath = "/chatbots",
+  extraTabs = [],
+}: {
+  chatbotid: string;
+  basePath?: string;
+  extraTabs?: { href: string; label: string }[];
+}) {
   const pathname = usePathname();
   const tabs = [
-    { href: `/chatbots/${chatbotid}`, label: "Overview" },
-    { href: `/chatbots/${chatbotid}/playground`, label: "Playground" },
-    { href: `/chatbots/${chatbotid}/analytics`, label: "Analytics" },
-    { href: `/chatbots/${chatbotid}/settings`, label: "Settings" },
+    { href: `${basePath}/${chatbotid}`, label: "Overview" },
+    { href: `${basePath}/${chatbotid}/playground`, label: "Playground" },
+    { href: `${basePath}/${chatbotid}/analytics`, label: "Analytics" },
+    ...extraTabs,
+    { href: `${basePath}/${chatbotid}/settings`, label: "Settings" },
   ];
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
 
   const activeIndex = tabs.findIndex((t) => {
-    if (t.href === `/chatbots/${chatbotid}`) {
+    if (t.href === `${basePath}/${chatbotid}`) {
       return pathname === t.href;
     }
     return pathname.startsWith(t.href);

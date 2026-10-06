@@ -7,7 +7,9 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  // shadowDatabaseUrl is NOT used with Supabase — Supabase manages migrations
+  // internally. Including it causes extra connection attempts that fail on
+  // restricted networks (hostel LAN, mobile hotspots, etc).
   extensions = [pg_stat_statements, pgcrypto, supabase_vault, uuid_ossp(map: "uuid-ossp"), vector]
 }
 
@@ -60,21 +62,47 @@ model Session {
 }
 
 model Organization {
-  id                     String       @id @default(cuid())
-  name                   String
-  createdAt              DateTime     @default(now())
-  plan                   Plan         @default(FREE)
-  planStatus             String?
-  currentPeriodEnd       DateTime?
-  messageQuota           Int          @default(100)
-  messagesUsedThisPeriod Int          @default(0)
-  razorpayCustomerId     String?      @unique
-  razorpaySubscriptionId String?      @unique
-  chatbots               Chatbot[]
-  invites                Invite[]
-  memberships            Membership[]
-  services               Service[]  
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+
+  // Billing identity only — the actual plan/quota/subscription lives on
+  // Service now (each service is independently billed).
+  razorpayCustomerId String? @unique
+
+  chatbots    Chatbot[]
+  invites     Invite[]
+  memberships Membership[]
+  services    Service[]
 }
+
+model Service {
+  id        String       @id @default(cuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  type      ServiceType
+  name      String
+  status    String       @default("ACTIVE")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // FEATURE: per-service billing — each service is independently
+  // subscribable, with its own plan and quota, not pooled with others.
+  plan                   Plan      @default(FREE)
+  razorpaySubscriptionId String?   @unique
+  planStatus              String?
+  currentPeriodEnd        DateTime?
+  messageQuota             Int       @default(100)
+  messagesUsedThisPeriod   Int       @default(0)
+
+  apiKeys         ApiKey[]
+  chatbot         Chatbot?
+  toolAgent       ToolAgent?
+  automationAgent AutomationAgent?
+
+  @@index([orgId])
+}
+
 
 model Chatbot {
   id                 String         @id @default(cuid())
@@ -106,6 +134,14 @@ model Chatbot {
   serviceId     String   @unique
   service       Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
+  // FEATURE: memory type — "simple" | "short_term" | "long_term". Set only
+  // at creation (not editable after), since it determines which URL
+  // namespace and tab set the chatbot lives under.
+
+  memoryType String @default("simple")
+
+  userMemories UserMemory[] 
+
   @@index([orgId])
 }
 
@@ -132,7 +168,7 @@ model DocumentChunk {
   content    String
   chunkIndex Int
   tokenCount Int
-  embedding  Unsupported("vector")?
+  embedding  Unsupported("vector(384)")?
   document   Document               @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([documentId])
@@ -255,24 +291,9 @@ enum ServiceType {
   AGENT
   CAG
   TOOL
+  AUTOMATION
 }
 
-model Service {
-  id        String      @id @default(cuid())
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  type      ServiceType
-  name      String
-  status    String      @default("ACTIVE")
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  apiKeys ApiKey[]
-  chatbot Chatbot?
-  toolAgent ToolAgent?
-
-  @@index([orgId])
-}
 
 
 model ToolAgent {
@@ -312,4 +333,74 @@ model ToolDefinition {
   createdAt   DateTime  @default(now())
 
   @@index([toolAgentId])
+}
+
+model UserMemory {
+  id                String   @id @default(cuid())
+  chatbotId         String
+  chatbot           Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  visitorIdentifier String   // stable per-visitor id (localStorage UUID, or email if captured)
+  content           String   @db.Text   // extracted fact, e.g. "User prefers dark mode"
+  importance        Float    @default(0.5)
+
+  // FEATURE: 384 dims to match EMBEDDINGS_PROVIDER=local (Xenova). Same
+  // caveat as DocumentChunk — switching to a paid 1536-dim provider later
+  // requires re-embedding existing memories, not just new ones.
+  embedding Unsupported("vector(384)")?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatbotId, visitorIdentifier])
+}
+
+
+
+model AutomationAgent {
+  id        String   @id @default(cuid())
+  serviceId String   @unique
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  name String
+
+  // FEATURE: the actual business logic customers configure — this IS the
+  // product. No code, no workflow builder, just plain-language criteria
+  // the AI uses to score and respond to every lead.
+  qualificationCriteria String @db.Text @default("A qualified lead clearly states a business need, timeline, or budget.")
+  redFlags               String? @db.Text
+  followUpTone            String @default("Friendly, professional, concise. Reference what the person specifically asked about.")
+  notifyEmail              String?  // business owner gets alerted on qualified leads
+
+  // Widget branding — same pattern as Chatbot
+  widgetTitle    String @default("Get in touch")
+  widgetColor    String @default("#f2a93b")
+  successMessage String @default("Thanks! We'll be in touch shortly.")
+  allowedOrigins String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads LeadRecord[]
+}
+
+model LeadRecord {
+  id                String          @id @default(cuid())
+  automationAgentId String
+  automationAgent   AutomationAgent @relation(fields: [automationAgentId], references: [id], onDelete: Cascade)
+
+  name    String
+  email   String
+  message String @db.Text
+
+  status         String   @default("PENDING") // PENDING | QUALIFIED | NOT_QUALIFIED | FAILED
+  score          Float?
+  aiReasoning    String?  @db.Text
+  followUpSent   Boolean  @default(false)
+  followUpBody   String?  @db.Text
+  errorMessage   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([automationAgentId, createdAt])
 }

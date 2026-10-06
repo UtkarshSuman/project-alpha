@@ -1,0 +1,83 @@
+[33m71d8059[m[33m ([m[1;32mrecovery-email[m[33m)[m refs/heads/recovery-email@{Tue Oct 6 23:52:02 2026}: branch: Created from 71d8059
+[33m8389e77[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m refs/heads/main@{Tue Oct 6 15:25:36 2026}: rebase (abort): returning to refs/heads/main
+[33m8389e77[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{Tue Oct 6 15:25:36 2026}: rebase (abort): returning to refs/heads/main
+[33m8389e77[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{Tue Oct 6 15:25:36 2026}: rebase (abort): returning to refs/heads/main
+[33m213c1c0[m refs/heads/main@{Tue Oct 6 15:22:07 2026}: commit: update marketing footer
+[33m213c1c0[m HEAD@{Tue Oct 6 15:22:07 2026}: commit: update marketing footer
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m refs/heads/main@{Tue Oct 6 15:21:52 2026}: reset: moving to HEAD^
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Tue Oct 6 15:21:52 2026}: reset: moving to HEAD^
+[33m71d8059[m[33m ([m[1;32mrecovery-email[m[33m)[m refs/heads/main@{Tue Oct 6 15:18:44 2026}: commit: email update
+[33m71d8059[m[33m ([m[1;32mrecovery-email[m[33m)[m HEAD@{Tue Oct 6 15:18:44 2026}: commit: email update
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m refs/remotes/vercel/main@{Sat Oct 3 02:19:46 2026}: update by push
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m refs/remotes/origin/main@{Sat Oct 3 02:19:32 2026}: update by push
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m refs/heads/main@{Sat Oct 3 02:19:18 2026}: commit: package update
+[33m4a7ecbb[m[33m ([m[1;31mvercel/main[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{Sat Oct 3 02:19:18 2026}: commit: package update
+[33m2932d50[m refs/remotes/vercel/main@{Sat Oct 3 01:58:34 2026}: update by push
+[33m2932d50[m refs/remotes/origin/main@{Sat Oct 3 01:55:50 2026}: update by push
+[33m2932d50[m refs/heads/main@{Sat Oct 3 01:55:34 2026}: commit: updated frontend and strengthen services
+[33m2932d50[m HEAD@{Sat Oct 3 01:55:34 2026}: commit: updated frontend and strengthen services
+[33m3c3acff[m refs/remotes/origin/main@{Fri Oct 2 19:03:35 2026}: update by push
+[33m3c3acff[m refs/heads/main@{Fri Oct 2 19:03:24 2026}: commit: service updates
+[33m3c3acff[m HEAD@{Fri Oct 2 19:03:24 2026}: commit: service updates
+[33m1ab0549[m refs/heads/main@{Wed Sep 9 11:44:26 2026}: commit: updated schema and frontend
+[33m1ab0549[m HEAD@{Wed Sep 9 11:44:26 2026}: commit: updated schema and frontend
+[33m3a274c2[m refs/remotes/origin/main@{Sun Sep 6 15:06:33 2026}: update by push
+[33m3a274c2[m refs/heads/main@{Sun Sep 6 15:05:56 2026}: commit: improved features and resolved errors
+[33m3a274c2[m HEAD@{Sun Sep 6 15:05:56 2026}: commit: improved features and resolved errors
+[33m43f2502[m refs/heads/main@{Thu Sep 3 23:02:42 2026}: commit: added read
+[33m43f2502[m HEAD@{Thu Sep 3 23:02:42 2026}: commit: added read
+[33mc00d02c[m refs/remotes/origin/main@{Sun Aug 30 19:36:53 2026}: update by push
+[33mc00d02c[m refs/heads/main@{Sun Aug 30 19:36:41 2026}: commit: added staging and test data cleaning feature
+[33mc00d02c[m HEAD@{Sun Aug 30 19:36:41 2026}: commit: added staging and test data cleaning feature
+[33m8ca1ff1[m refs/remotes/origin/main@{Mon Aug 24 02:38:50 2026}: update by push
+[33m8ca1ff1[m refs/heads/main@{Mon Aug 24 02:38:36 2026}: commit: added loading animation
+[33m8ca1ff1[m HEAD@{Mon Aug 24 02:38:36 2026}: commit: added loading animation
+[33mfbe0819[m refs/heads/main@{Thu Aug 20 16:10:22 2026}: commit: Force fresh deploy from latest main
+[33mfbe0819[m HEAD@{Thu Aug 20 16:10:22 2026}: commit: Force fresh deploy from latest main
+[33m419745c[m refs/heads/main@{Thu Aug 20 16:09:35 2026}: commit: Force fresh deploy from latest main
+[33m419745c[m HEAD@{Thu Aug 20 16:09:35 2026}: commit: Force fresh deploy from latest main
+[33m3fbb0fc[m refs/remotes/origin/main@{Thu Aug 20 16:08:38 2026}: update by push
+[33m3fbb0fc[m refs/heads/main@{Thu Aug 20 16:08:34 2026}: commit: Force fresh deploy from latest main
+[33m3fbb0fc[m HEAD@{Thu Aug 20 16:08:34 2026}: commit: Force fresh deploy from latest main
+[33madf96d9[m refs/remotes/origin/main@{Sun Aug 16 15:32:57 2026}: update by push
+[33madf96d9[m refs/heads/main@{Sun Aug 16 15:32:54 2026}: commit: Fix reset-password Suspense boundary, remove leftover Stripe files
+[33madf96d9[m HEAD@{Sun Aug 16 15:32:54 2026}: commit: Fix reset-password Suspense boundary, remove leftover Stripe files
+[33m51489be[m refs/remotes/origin/main@{Sun Aug 16 15:20:27 2026}: update by push
+[33m51489be[m refs/heads/main@{Sun Aug 16 15:19:56 2026}: commit: fix: wrap useSearchParams in Suspense for login and register pages
+[33m51489be[m HEAD@{Sun Aug 16 15:19:56 2026}: commit: fix: wrap useSearchParams in Suspense for login and register pages
+[33mabbf21f[m refs/remotes/origin/main@{Sun Aug 16 03:44:21 2026}: update by push
+[33mabbf21f[m refs/heads/main@{Sun Aug 16 03:44:07 2026}: commit: managed login suspend issue
+[33mabbf21f[m HEAD@{Sun Aug 16 03:44:07 2026}: commit: managed login suspend issue
+[33m33b4c98[m refs/remotes/origin/main@{Sun Aug 16 02:53:55 2026}: update by push
+[33m33b4c98[m refs/heads/main@{Sun Aug 16 02:53:41 2026}: commit: resolved embedding import issue
+[33m33b4c98[m HEAD@{Sun Aug 16 02:53:41 2026}: commit: resolved embedding import issue
+[33me62f44e[m refs/remotes/origin/main@{Sun Aug 16 02:44:03 2026}: update by push
+[33me62f44e[m refs/heads/main@{Sun Aug 16 02:43:48 2026}: commit: removed type error
+[33me62f44e[m HEAD@{Sun Aug 16 02:43:48 2026}: commit: removed type error
+[33maf9734a[m refs/remotes/origin/main@{Sun Aug 16 02:37:00 2026}: update by push
+[33maf9734a[m refs/heads/main@{Sun Aug 16 02:36:47 2026}: commit: removed type error
+[33maf9734a[m HEAD@{Sun Aug 16 02:36:47 2026}: commit: removed type error
+[33m1fb2cdb[m refs/remotes/origin/main@{Sun Aug 16 02:20:45 2026}: update by push
+[33m1fb2cdb[m refs/heads/main@{Sun Aug 16 02:20:42 2026}: commit: Remove leftover Stripe files, fully migrated to Razorpay
+[33m1fb2cdb[m HEAD@{Sun Aug 16 02:20:42 2026}: commit: Remove leftover Stripe files, fully migrated to Razorpay
+[33m9405963[m refs/remotes/origin/main@{Sun Aug 16 02:08:10 2026}: update by push
+[33m9405963[m refs/heads/main@{Sun Aug 16 02:07:56 2026}: commit: widget and schema updates
+[33m9405963[m HEAD@{Sun Aug 16 02:07:56 2026}: commit: widget and schema updates
+[33m42bb715[m refs/remotes/origin/main@{Fri Aug 14 23:11:48 2026}: update by push
+[33m42bb715[m refs/heads/main@{Fri Aug 14 23:11:33 2026}: commit: updates
+[33m42bb715[m HEAD@{Fri Aug 14 23:11:33 2026}: commit: updates
+[33m1aed32e[m refs/remotes/origin/main@{Wed Aug 12 23:24:22 2026}: update by push
+[33m1aed32e[m refs/heads/main@{Wed Aug 12 23:24:11 2026}: commit: added password reset mechanism
+[33m1aed32e[m HEAD@{Wed Aug 12 23:24:11 2026}: commit: added password reset mechanism
+[33m8c60bfb[m refs/remotes/origin/main@{Sun Aug 9 23:50:51 2026}: update by push
+[33m8c60bfb[m refs/heads/main@{Sun Aug 9 23:50:36 2026}: commit: added widget size feature
+[33m8c60bfb[m HEAD@{Sun Aug 9 23:50:36 2026}: commit: added widget size feature
+[33m0afb5f2[m refs/remotes/origin/main@{Wed Aug 5 00:30:51 2026}: update by push
+[33m0afb5f2[m refs/heads/main@{Wed Aug 5 00:30:34 2026}: commit: added widget logo dynamic positioning and design
+[33m0afb5f2[m HEAD@{Wed Aug 5 00:30:34 2026}: commit: added widget logo dynamic positioning and design
+[33mb2115e5[m refs/remotes/origin/main@{Tue Aug 4 21:51:58 2026}: update by push
+[33mb2115e5[m refs/heads/main@{Tue Aug 4 21:51:46 2026}: commit: fixed chatbot question fallback issue
+[33mb2115e5[m HEAD@{Tue Aug 4 21:51:46 2026}: commit: fixed chatbot question fallback issue
+[33m99c93d1[m refs/remotes/origin/main@{Sat Aug 1 18:51:22 2026}: update by push
+[33m99c93d1[m refs/heads/main@{Sat Aug 1 18:51:09 2026}: commit: added email facility to team invite
+[33m9

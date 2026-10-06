@@ -3,6 +3,7 @@ import { z } from "zod";
 
 export const createChatbotSchema = z.object({
   name: z.string().min(1, "Name is required").max(80),
+  memoryType: z.enum(["simple", "short_term", "long_term"]).default("simple"), //memory type isn't editable after creation
 });
 
 export const updateChatbotSchema = z.object({

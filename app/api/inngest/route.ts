@@ -7,8 +7,10 @@
 import { serve } from "inngest/next";
 import { inngest } from "@/lib/inngest/client";
 import { ingestDocument } from "@/lib/inngest/functions/ingest-document";
+import { extractMemory } from "@/lib/inngest/functions/extract-memory";
+import { processLead } from "@/lib/inngest/functions/process-lead";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [ingestDocument],
+  functions: [ingestDocument, extractMemory, processLead],
 });

@@ -31,6 +31,8 @@
 // - SIZES controls actual dimensions, independently, across 3 breakpoints:
 //   desktop (default), tablet (<=900px), mobile (<=480px, full bottom sheet)
 // ============================================================================
+
+
 (function () {
   const scriptTag = document.currentScript;
   const chatbotId = scriptTag.getAttribute("data-chatbot-id");
@@ -55,12 +57,28 @@
 
   // Dimensions ONLY, per breakpoint — independent of theme.
   const SIZES = {
-    small:  { bubble: 48, desktopW: 320, desktopH: 460, tabletW: 340, tabletH: 480, mobileVh: 72 },
+    small: { bubble: 48, desktopW: 320, desktopH: 460, tabletW: 340, tabletH: 480, mobileVh: 72 },
     medium: { bubble: 60, desktopW: 400, desktopH: 580, tabletW: 380, tabletH: 540, mobileVh: 85 },
-    large:  { bubble: 72, desktopW: 460, desktopH: 660, tabletW: 420, tabletH: 600, mobileVh: 92 },
+    large: { bubble: 72, desktopW: 460, desktopH: 660, tabletW: 420, tabletH: 600, mobileVh: 92 },
   };
 
   async function init() {
+
+    function getOrCreateVisitorId() {
+      const KEY = "docent_visitor_id";
+      try {
+        let id = localStorage.getItem(KEY);
+        if (!id) {
+          id = (crypto.randomUUID ? crypto.randomUUID() : `v_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+          localStorage.setItem(KEY, id);
+        }
+        return id;
+      } catch {
+        return null; // localStorage unavailable (private browsing, etc.) — long-term memory degrades gracefully to no memory
+      }
+    }
+    const visitorIdentifier = getOrCreateVisitorId();  // this identifier is per-browser (localStorage), not per-person — the same visitor on a different device or browser gets treated as a new person. True cross-device identity would need email-based identification, which is a reasonable future upgrade once lead capture and long-term memory are tied together
+
     let config = {
       widgetTitle: "Chat with us",
       widgetColor: "#6366f1",
@@ -306,7 +324,7 @@
       });
     }
 
-        async function sendMessage() {
+    async function sendMessage() {
       const text = inputEl.value.trim();
       if (!text) return;
       inputEl.value = "";
@@ -320,7 +338,7 @@
         const res = await fetch(`${apiBase}/api/chat/${chatbotId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ message: text, sessionId }),
+          body: JSON.stringify({ message: text, sessionId, visitorIdentifier }), //this identifier is per-browser (localStorage), not per-person — the same visitor on a different device or browser gets treated as a new person. True cross-device identity would need email-based identification, which is a reasonable future upgrade once lead capture and long-term memory are tied together.
         });
 
         if (!res.ok) {
