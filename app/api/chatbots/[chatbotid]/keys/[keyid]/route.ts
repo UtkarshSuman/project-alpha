@@ -1,4 +1,5 @@
 // FEATURE: Revoke an API key (soft-delete via isActive, keeps usage history)
+// Keys now belong to Service, not directly to Chatbot — see Service model migration.
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
@@ -12,10 +13,10 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
 
     const key = await prisma.apiKey.findUnique({
       where: { id: keyid },
-      include: { chatbot: true },
+      include: { service: { include: { chatbot: true } } },
     });
 
-    if (!key || key.chatbotId !== chatbotid || key.chatbot.orgId !== orgId) {
+    if (!key || key.service.chatbot?.id !== chatbotid || key.service.orgId !== orgId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 

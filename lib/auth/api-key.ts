@@ -40,8 +40,8 @@ export async function validateApiKey(rawKey: string | null) {
   const apiKey = await prisma.apiKey.findUnique({
     where: { keyHash: hash },
     include: {
-      chatbot: {
-        include: { org: true },
+      service: {
+        include: { org: true, chatbot: true },
       },
     },
   });

@@ -61,4 +61,3 @@ export async function retrieveRelevantChunks(
     }))
     .filter((r) => r.similarity >= SIMILARITY_THRESHOLD);
 }
-

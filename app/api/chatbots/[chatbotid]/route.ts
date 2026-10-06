@@ -10,18 +10,7 @@
 // before returning/mutating it — never trust the :chatbotid path param alone,
 // or org A could read/edit org B's chatbot just by guessing an id.
 // ============================================================================
-// ============================================================================
-// FEATURE: Single chatbot — get / update settings / delete
-// GET    /api/chatbots/:chatbotid
-// PATCH  /api/chatbots/:chatbotid
-// DELETE /api/chatbots/:chatbotid   -> cascades to documents, chunks, keys
-//
-// Next.js 15+/16: dynamic route params are now async (Promise-wrapped) in
-// route handlers too, not just pages — must `await params` before use.
-//
-// SECURITY: every handler verifies the chatbot belongs to the caller's org
-// before returning/mutating it — never trust the :chatbotid path param alone.
-// ============================================================================
+
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
@@ -45,8 +34,12 @@ export async function GET(_req: Request, { params }: RouteParams) {
       where: { id: chatbotid },
       include: {
         documents: true,
-        apiKeys: {
-          select: { id: true, name: true, keyPrefix: true, isActive: true, lastUsedAt: true, createdAt: true },
+        service: {
+          include: {
+            apiKeys: {
+              select: { id: true, name: true, keyPrefix: true, isActive: true, lastUsedAt: true, createdAt: true },
+            },
+          },
         },
       },
     });
@@ -55,7 +48,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ chatbot });
+    return NextResponse.json({ chatbot: { ...chatbot, apiKeys: chatbot.service.apiKeys } });
   } catch (err) {
     if (err instanceof UnauthorizedError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error(err);
@@ -80,10 +73,12 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       );
     }
 
-    const chatbot = await prisma.chatbot.update({
-      where: { id: chatbotid },
-      data: parsed.data,
-    });
+    const [chatbot] = await prisma.$transaction([
+      prisma.chatbot.update({ where: { id: chatbotid }, data: parsed.data }),
+      ...(parsed.data.name
+        ? [prisma.service.update({ where: { id: owned.serviceId }, data: { name: parsed.data.name } })]
+        : []),
+    ]);
 
     return NextResponse.json({ chatbot });
   } catch (err) {
@@ -101,7 +96,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
     const owned = await getOwnedChatbot(chatbotid, orgId);
     if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await prisma.chatbot.delete({ where: { id: chatbotid } });
+    await prisma.service.delete({ where: { id: owned.serviceId } });
 
     return NextResponse.json({ success: true });
   } catch (err) {

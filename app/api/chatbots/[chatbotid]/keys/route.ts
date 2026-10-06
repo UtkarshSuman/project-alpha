@@ -2,6 +2,9 @@
 // FEATURE: API key list + create
 // GET  /api/chatbots/:chatbotid/keys   -> list keys (prefix only, never raw)
 // POST /api/chatbots/:chatbotid/keys   -> create key, returns RAW key ONCE
+//
+// Keys now belong to Service (shared across future service types), not
+// directly to Chatbot — see the Service model migration.
 // ============================================================================
 
 import { NextResponse } from "next/server";
@@ -25,7 +28,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
     if (!chatbot) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const keys = await prisma.apiKey.findMany({
-      where: { chatbotId: chatbotid },
+      where: { serviceId: chatbot.serviceId },
       select: { id: true, name: true, keyPrefix: true, isActive: true, lastUsedAt: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     });
@@ -51,10 +54,9 @@ export async function POST(req: Request, { params }: RouteParams) {
     const { raw, prefix, hash } = generateApiKey();
 
     const apiKey = await prisma.apiKey.create({
-      data: { chatbotId: chatbotid, name, keyPrefix: prefix, keyHash: hash },
+      data: { serviceId: chatbot.serviceId, name, keyPrefix: prefix, keyHash: hash },
     });
 
-    // Raw key returned ONLY here, this one time — never again after this response.
     return NextResponse.json({ apiKey: { ...apiKey, rawKey: raw } }, { status: 201 });
   } catch (err) {
     if (err instanceof UnauthorizedError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

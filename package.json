@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:db": "node scripts/test-db-connection.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
@@ -23,9 +24,13 @@
     "lucide-react": "^1.24.0",
     "next": "16.2.10",
     "next-auth": "^4.24.14",
+    "openai": "^7.4.0",
     "pdf-parse": "^2.4.5",
+    "razorpay": "^2.9.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "recharts": "^3.9.2",
+    "resend": "^6.18.1",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {

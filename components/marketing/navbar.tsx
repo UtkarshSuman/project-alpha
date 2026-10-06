@@ -11,14 +11,15 @@ export async function Navbar() {
   const session = await getServerSession(authOptions);
 
   return (
-    <header className="border-b border-line">
+    <header className="sticky top-0 z-40 border-b border-line bg-ink/95">
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="font-display text-lg font-semibold tracking-tight">
-          docent<span className="text-accent">.</span>
+          uveriq<span className="text-accent">.</span>
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
+          <Link href="/#services" className="hover:text-text">Services</Link>
           <Link href="/pricing" className="hover:text-text">Pricing</Link>
-          <Link href="/#how-it-works" className="hover:text-text">How it works</Link>
+          <Link href="/#how-it-works" className="hover:text-text">Platform</Link>
         </nav>
         <div className="flex items-center gap-3">
           {session ? (

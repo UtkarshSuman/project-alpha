@@ -12,16 +12,16 @@
 // and re-ingest existing documents when switching.
 // ============================================================================
 
-// import OpenAI from "openai";
+import OpenAI from "openai";
 
-// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// export async function embedTexts(texts: string[]): Promise<number[][]> {
-//   const res = await openai.embeddings.create({
-//     model: "text-embedding-3-small",
-//     input: texts,
-//   });
-//   return res.data.map((d) => d.embedding);
-// }
+export async function embedTexts(texts: string[]): Promise<number[][]> {
+  const res = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: texts,
+  });
+  return res.data.map((d) => d.embedding);
+}
 
 // export const EMBEDDING_DIMENSIONS = 1536;

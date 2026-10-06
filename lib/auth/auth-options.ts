@@ -14,6 +14,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
+import { FREE_PLAN_MESSAGE_QUOTA } from "@/lib/billing/config";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -69,6 +70,7 @@ export const authOptions: NextAuthOptions = {
         await prisma.organization.create({
           data: {
             name: `${user.name ?? "My"}'s Workspace`,
+            messageQuota: FREE_PLAN_MESSAGE_QUOTA,
             memberships: {
               create: { userId: created.id, role: "OWNER" },
             },
@@ -79,6 +81,7 @@ export const authOptions: NextAuthOptions = {
         await prisma.organization.create({
           data: {
             name: `${existing.name ?? "My"}'s Workspace`,
+            messageQuota: FREE_PLAN_MESSAGE_QUOTA,
             memberships: { create: { userId: existing.id, role: "OWNER" } },
           },
         });

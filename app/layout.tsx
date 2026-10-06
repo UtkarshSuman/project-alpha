@@ -9,9 +9,9 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 export const metadata: Metadata = {
-  title: "Docent — Turn your docs into a chatbot that knows them cold",
+  title: "Uveriq - AI services for retrieval, agents, automation, and CAG",
   description:
-    "Upload a PDF or text file, get a custom AI chatbot with its own API key. Drop it into your site in minutes.",
+    "Build governed AI services for retrieval, agents, automation, and cache-augmented generation from one workspace.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,10 +1,9 @@
 // ============================================================================
 // FEATURE: Create-chatbot dialog
-// Calls POST /api/chat (your renamed CRUD route) and redirects to the new
-// chatbot's page on success — where the next section (file upload) happens.
-// Handles the FREE-plan-limit 403 response from the API with a real message
-// instead of a generic error.
+// Calls POST /api/chatbots and redirects to the new chatbot's page on success.
+// Handles plan limits gracefully, with loading states and toast notifications.
 // ============================================================================
+
 "use client";
 
 import { useState } from "react";
@@ -13,8 +12,14 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/hooks/use-toast";
 
-export function CreateChatbotDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+type Props = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export function CreateChatbotDialog({ open, onClose }: Props) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,47 +27,93 @@ export function CreateChatbotDialog({ open, onClose }: { open: boolean; onClose:
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const res = await fetch("/api/chatbots", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
-
-    setLoading(false);
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Something went wrong.");
+    if (!name.trim()) {
+      setError("Chatbot name is required");
       return;
     }
 
-    const { chatbot } = await res.json();
-    onClose();
-    router.push(`/chatbots/${chatbot.id}`);
-    router.refresh();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/chatbots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError(data.error ?? "Failed to create chatbot.");
+        setLoading(false);
+        return;
+      }
+
+      onClose();
+      setName("");
+      toast.success("Chatbot created");
+      router.push(`/chatbots/${data.chatbot.id}`);
+      router.refresh();
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleClose() {
+    if (!loading) {
+      setName("");
+      setError(null);
+      onClose();
+    }
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Create a chatbot">
+    <Dialog open={open} onClose={handleClose} title="Create a chatbot">
       <form onSubmit={handleSubmit} className="space-y-4">
+        <p className="text-sm text-muted">
+          Give your chatbot a name. You can upload knowledge base documents and configure retrieval
+          parameters immediately after creation.
+        </p>
+
         <div>
           <Label htmlFor="chatbot-name">Name</Label>
           <Input
             id="chatbot-name"
-            placeholder="e.g. Support Bot"
+            placeholder="e.g. Customer Support, Sales Assistant"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (error) setError(null);
+            }}
+            error={error ?? undefined}
+            disabled={loading}
             required
             autoFocus
+            className="mt-1"
           />
+          {error && (
+            <p className="mt-1.5 text-xs text-danger" role="alert">
+              {error}
+            </p>
+          )}
         </div>
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <Button type="submit" className="w-full">
-          {loading ? "Creating..." : "Create chatbot"}
-        </Button>
+
+        <div className="flex justify-end gap-2 pt-2 border-t border-line/40">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" loading={loading}>
+            Create chatbot
+          </Button>
+        </div>
       </form>
     </Dialog>
   );
