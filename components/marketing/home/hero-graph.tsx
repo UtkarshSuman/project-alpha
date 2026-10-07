@@ -9,7 +9,6 @@ interface NodeItem {
   sub: string;
   icon: React.ElementType;
   color: string;
-  position: "top-left" | "top" | "top-right" | "bottom-right" | "bottom" | "bottom-left";
   coord: { x: number; y: number };
 }
 
@@ -20,8 +19,7 @@ const NODES: NodeItem[] = [
     sub: "Knowledge / Context",
     icon: Database,
     color: "#2563eb",
-    position: "top-left",
-    coord: { x: 135, y: 70 },
+    coord: { x: 130, y: 80 },
   },
   {
     id: "act",
@@ -29,8 +27,7 @@ const NODES: NodeItem[] = [
     sub: "Tools / APIs",
     icon: Zap,
     color: "#059669",
-    position: "top",
-    coord: { x: 320, y: 38 },
+    coord: { x: 350, y: 38 },
   },
   {
     id: "automate",
@@ -38,8 +35,7 @@ const NODES: NodeItem[] = [
     sub: "Workflows",
     icon: Workflow,
     color: "#7c3aed",
-    position: "top-right",
-    coord: { x: 505, y: 70 },
+    coord: { x: 570, y: 80 },
   },
   {
     id: "observe",
@@ -47,8 +43,7 @@ const NODES: NodeItem[] = [
     sub: "Analytics / Monitoring",
     icon: Activity,
     color: "#0891b2",
-    position: "bottom-right",
-    coord: { x: 505, y: 310 },
+    coord: { x: 570, y: 380 },
   },
   {
     id: "cache",
@@ -56,8 +51,7 @@ const NODES: NodeItem[] = [
     sub: "Low-latency Intelligence",
     icon: Cpu,
     color: "#ea580c",
-    position: "bottom",
-    coord: { x: 320, y: 342 },
+    coord: { x: 350, y: 422 },
   },
   {
     id: "remember",
@@ -65,26 +59,25 @@ const NODES: NodeItem[] = [
     sub: "Permanent Context",
     icon: Brain,
     color: "#db2777",
-    position: "bottom-left",
-    coord: { x: 135, y: 310 },
+    coord: { x: 130, y: 380 },
   },
 ];
 
 export function HeroGraph() {
   const [activeNode, setActiveNode] = useState<string | null>(null);
 
-  const centerCoord = { x: 320, y: 190 };
+  const centerCoord = { x: 350, y: 230 };
 
   return (
-    <div className="relative mx-auto w-full max-w-[640px] select-none">
+    <div className="relative mx-auto w-full max-w-[720px] select-none">
       {/* Background radial ambient glow */}
-      <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-gradient-to-tr from-blue-100/40 via-indigo-50/20 to-emerald-50/30 blur-2xl" />
+      <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-blue-500/10 via-indigo-500/5 to-emerald-500/10 blur-3xl" />
 
-      {/* Outer Card with expanded boundary and white/translucent background */}
-      <div className="relative aspect-[640/380] w-full rounded-3xl border border-slate-200/90 bg-white/80 p-4 shadow-sm backdrop-blur-md md:p-6 overflow-hidden">
+      {/* Outer Card with enlarged canvas and semantic theme tokens */}
+      <div className="relative aspect-[700/460] w-full rounded-3xl border border-line bg-surface/90 p-5 shadow-md backdrop-blur-md md:p-8 overflow-hidden transition-colors duration-fast">
         {/* SVG connection lines between center and surrounding nodes */}
         <svg
-          viewBox="0 0 640 380"
+          viewBox="0 0 700 460"
           className="absolute inset-0 h-full w-full pointer-events-none"
         >
           <defs>
@@ -93,7 +86,7 @@ export function HeroGraph() {
               <stop offset="100%" stopColor="#2563eb" stopOpacity="0.8" />
             </linearGradient>
             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
@@ -101,9 +94,9 @@ export function HeroGraph() {
           {NODES.map((node) => {
             const isHovered = activeNode === node.id;
             const isAnyHovered = activeNode !== null;
-            const strokeColor = isHovered ? node.color : "#cbd5e1";
-            const strokeWidth = isHovered ? 2.5 : 1.5;
-            const opacity = isHovered ? 1 : isAnyHovered ? 0.35 : 0.7;
+            const strokeColor = isHovered ? node.color : "var(--color-line)";
+            const strokeWidth = isHovered ? 3 : 1.75;
+            const opacity = isHovered ? 1 : isAnyHovered ? 0.35 : 0.75;
 
             // Curved bezier path from center to node
             const dx = node.coord.x - centerCoord.x;
@@ -122,16 +115,16 @@ export function HeroGraph() {
                   fill="none"
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
-                  strokeDasharray={isHovered ? "none" : "3 3"}
+                  strokeDasharray={isHovered ? "none" : "4 4"}
                   opacity={opacity}
                   className="transition-all duration-300"
                 />
 
                 {/* Animated pulse dot moving along the path */}
                 <circle
-                  r={isHovered ? 3.5 : 2}
+                  r={isHovered ? 4 : 2.5}
                   fill={isHovered ? node.color : "#3b82f6"}
-                  opacity={isHovered ? 1 : 0.6}
+                  opacity={isHovered ? 1 : 0.75}
                 >
                   <animateMotion
                     path={pathD}
@@ -148,28 +141,28 @@ export function HeroGraph() {
         <div
           className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 cursor-default transition-all duration-300"
         >
-          <div className="group relative flex flex-col items-center rounded-2xl border border-slate-900 bg-slate-950 px-5 py-3.5 text-center shadow-lg hover:shadow-xl sm:px-6 sm:py-4">
-            <span className="text-[9px] font-semibold tracking-wider text-slate-400 uppercase sm:text-[10px]">
+          <div className="group relative flex flex-col items-center rounded-2xl border-2 border-line bg-ink px-6 py-4 text-center shadow-xl hover:shadow-2xl sm:px-8 sm:py-5">
+            <span className="text-[10px] font-semibold tracking-wider text-muted uppercase sm:text-xs">
               AI Service Control Plane
             </span>
-            <div className="mt-0.5 flex items-center gap-1.5 font-display text-xl font-bold tracking-tight text-white sm:text-2xl">
+            <div className="mt-1 flex items-center gap-2 font-display text-2xl font-bold tracking-tight text-text sm:text-3xl">
               <span>UVERIQ</span>
-              <span className="inline-block h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent animate-pulse" />
             </div>
-            <div className="mt-1 inline-flex items-center rounded-full bg-slate-800/90 px-2 py-0.5 text-[9px] font-medium tracking-wide text-slate-300 sm:text-[10px]">
+            <div className="mt-1.5 inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-muted sm:text-[11px]">
               AI SERVICE LAYER
             </div>
           </div>
         </div>
 
-        {/* 6 Peripheral Service Nodes (Comfortably positioned inside the card boundary) */}
+        {/* 6 Peripheral Service Nodes with Wide Gaps */}
         {NODES.map((node) => {
           const isHovered = activeNode === node.id;
           const Icon = node.icon;
 
-          // Position styles based on coordinate percentages of 640 x 380
-          const leftPercent = (node.coord.x / 640) * 100;
-          const topPercent = (node.coord.y / 380) * 100;
+          // Position styles based on coordinate percentages of 700 x 460
+          const leftPercent = (node.coord.x / 700) * 100;
+          const topPercent = (node.coord.y / 460) * 100;
 
           return (
             <div
@@ -186,26 +179,26 @@ export function HeroGraph() {
               }`}
             >
               <div
-                className={`flex items-center gap-2 rounded-xl border bg-white px-2.5 py-1.5 shadow-xs transition-all sm:gap-2.5 sm:px-3 sm:py-2 ${
+                className={`flex items-center gap-2.5 rounded-2xl border bg-surface px-3 py-2 shadow-xs transition-all sm:gap-3 sm:px-3.5 sm:py-2.5 ${
                   isHovered
-                    ? "border-slate-800 ring-2 ring-blue-500/20 shadow-md"
-                    : "border-slate-200/90 hover:border-slate-300"
+                    ? "border-accent ring-2 ring-accent/20 shadow-md"
+                    : "border-line hover:border-text/40"
                 }`}
               >
                 <div
-                  className="flex h-7 w-7 items-center justify-center rounded-lg sm:h-8 sm:w-8"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl sm:h-9 sm:w-9"
                   style={{
                     backgroundColor: `${node.color}15`,
                     color: node.color,
                   }}
                 >
-                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                 </div>
                 <div className="text-left">
-                  <div className="font-mono text-[10px] font-bold tracking-wider text-slate-900 sm:text-[11px]">
+                  <div className="font-mono text-[11px] font-bold tracking-wider text-text sm:text-xs">
                     {node.name}
                   </div>
-                  <div className="text-[9px] font-medium text-slate-500 sm:text-[10px] whitespace-nowrap">
+                  <div className="text-[10px] font-medium text-muted sm:text-[11px] whitespace-nowrap">
                     {node.sub}
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquare, Clock, Database, Send, Sparkles, Check } from "lucide-react";
+import { MessageSquare, Clock, Database, Send, Sparkles } from "lucide-react";
 
 const MEMORY_MODES = [
   {
@@ -69,19 +69,19 @@ export function ConversationDemo() {
   };
 
   return (
-    <section className="border-b border-slate-200/80 bg-white py-16 md:py-24">
+    <section className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
           {/* Left Column: Narrative and Memory Controls */}
           <div className="lg:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+            <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
               <Sparkles className="h-3.5 w-3.5" />
               Conversational Surface
             </div>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl">
               And yes, it can power intelligent conversations.
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
               Embed a customized widget on your website or use our headless API.
               Equip conversations with grounded document retrieval, live API
               actions, and controllable memory lifecycles.
@@ -99,29 +99,29 @@ export function ConversationDemo() {
                     onClick={() => setSelectedMode(mode.id)}
                     className={`flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-all ${
                       isSelected
-                        ? "border-blue-600 bg-blue-50/40 shadow-sm ring-1 ring-blue-500/20"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-accent bg-accent/10 shadow-sm ring-1 ring-accent/30"
+                        : "border-line bg-surface hover:border-text/30 hover:bg-surface-hover"
                     }`}
                   >
                     <div
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
                         isSelected
-                          ? "bg-blue-600 text-white"
-                          : "bg-slate-100 text-slate-600"
+                          ? "bg-accent text-white"
+                          : "bg-surface-hover text-muted"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-display text-sm font-bold text-slate-900">
+                        <span className="font-display text-sm font-bold text-text">
                           {mode.name}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-600">
+                        <span className="rounded-full bg-surface-hover px-2 py-0.5 font-mono text-[10px] text-muted">
                           {mode.tag}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      <p className="mt-1 text-xs leading-relaxed text-muted">
                         {mode.desc}
                       </p>
                     </div>
@@ -133,31 +133,31 @@ export function ConversationDemo() {
 
           {/* Right Column: Simulated Live Chatbot Surface */}
           <div className="lg:col-span-6">
-            <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+            <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-line bg-surface shadow-xl">
               {/* Chat Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+              <div className="flex items-center justify-between border-b border-line bg-surface-hover/70 px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-white">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="font-display text-sm font-bold text-slate-900">
+                    <div className="font-display text-sm font-bold text-text">
                       Uveriq Support AI
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success" />
                       Memory: {selectedMode.replace("_", " ")}
                     </div>
                   </div>
                 </div>
 
-                <span className="rounded-md border border-slate-200 bg-white px-2 py-1 font-mono text-[10px] font-medium text-slate-600">
+                <span className="rounded-md border border-line bg-surface px-2 py-1 font-mono text-[10px] font-medium text-muted">
                   pgvector live
                 </span>
               </div>
 
               {/* Chat Messages Body */}
-              <div className="space-y-4 p-5 max-h-[380px] overflow-y-auto bg-slate-50/30">
+              <div className="space-y-4 p-5 max-h-[380px] overflow-y-auto bg-ink/40">
                 {messages.map((m, i) => (
                   <div
                     key={i}
@@ -168,8 +168,8 @@ export function ConversationDemo() {
                     <div
                       className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
                         m.role === "user"
-                          ? "bg-blue-600 text-white rounded-br-xs"
-                          : "border border-slate-200/80 bg-white text-slate-800 rounded-bl-xs shadow-sm"
+                          ? "bg-accent text-white rounded-br-xs"
+                          : "border border-line bg-surface text-text rounded-bl-xs shadow-sm"
                       }`}
                     >
                       {m.content}
@@ -177,11 +177,11 @@ export function ConversationDemo() {
 
                     {m.citation && (
                       <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px]">
-                        <span className="font-mono text-blue-600 font-medium">
+                        <span className="font-mono text-accent font-medium">
                           Citation: {m.citation}
                         </span>
                         {m.memoryRecall && (
-                          <span className="rounded bg-pink-50 px-1.5 py-0.5 text-pink-700 font-mono text-[9px]">
+                          <span className="rounded bg-pink-500/10 px-1.5 py-0.5 text-pink-500 font-mono text-[9px]">
                             {m.memoryRecall}
                           </span>
                         )}
@@ -194,18 +194,18 @@ export function ConversationDemo() {
               {/* Chat Input Field */}
               <form
                 onSubmit={handleSend}
-                className="border-t border-slate-100 bg-white p-3 flex items-center gap-2"
+                className="border-t border-line bg-surface p-3 flex items-center gap-2"
               >
                 <input
                   type="text"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   placeholder="Ask a question about your documents..."
-                  className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="flex-1 rounded-xl border border-line bg-ink/50 px-3.5 py-2 text-xs text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
                 <button
                   type="submit"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm hover:bg-blue-700 transition-colors"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-sm hover:brightness-110 transition-colors"
                 >
                   <Send className="h-3.5 w-3.5" />
                 </button>

@@ -11,22 +11,21 @@
    generation, plain :root custom properties are not picked up as utilities.
    ============================================================================ */
 @theme {
-  /* ---- Brand palette (unchanged values) ---- */
-  --color-ink: #0b0e14;
-  --color-surface: #131722;
-  --color-surface-hover: #171c29;
-  --color-line: #232838;
-  --color-text: #e7e9ee;
-  --color-muted: #8b92a6;
-  --color-accent: #f2a93b;
-  --color-accent-2: #4fd1c5;
+  /* ---- Brand palette (dynamic variables based on active theme) ---- */
+  --color-ink: var(--ink);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
 
-  /* ---- Semantic colors (new — derived to sit inside the existing palette,
-     see DESIGN.md §2) ---- */
-  --color-success: #4fbf8b;
-  --color-warning: var(--color-accent); /* reuse amber — no second yellow */
-  --color-danger: #e0605a;
-  --color-danger-muted: #3a1f21; /* subtle bg for danger-zone cards */
+  /* ---- Semantic colors ---- */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-muted);
 
   /* ---- Fonts (unchanged) ---- */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -82,10 +81,64 @@
     motif + hero interactions only — see DESIGN.md §5, don't use as a default */
 }
 
+/* ============================================================================
+   Brand Theme Variables — Light mode (Default) & Dark mode
+   ============================================================================ */
+:root {
+  /* LIGHT MODE (Clean, natural, matching the home / marketing page design) */
+  --ink: #f8f9fa;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --line: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent-2: #0d9488;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --danger-muted: #fee2e2;
+}
+
+.dark,
+[data-theme="dark"] {
+  /* DARK MODE (Present original dark design) */
+  --ink: #0b0e14;
+  --surface: #131722;
+  --surface-hover: #171c29;
+  --line: #232838;
+  --text: #e7e9ee;
+  --muted: #8b92a6;
+  --accent: #f2a93b;
+  --accent-2: #4fd1c5;
+  --success: #4fbf8b;
+  --warning: #f2a93b;
+  --danger: #e0605a;
+  --danger-muted: #3a1f21;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --ink: #0b0e14;
+    --surface: #131722;
+    --surface-hover: #171c29;
+    --line: #232838;
+    --text: #e7e9ee;
+    --muted: #8b92a6;
+    --accent: #f2a93b;
+    --accent-2: #4fd1c5;
+    --success: #4fbf8b;
+    --warning: #f2a93b;
+    --danger: #e0605a;
+    --danger-muted: #3a1f21;
+  }
+}
+
 body {
   background-color: var(--color-ink);
   color: var(--color-text);
   text-rendering: geometricPrecision;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 ::selection {

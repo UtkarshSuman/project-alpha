@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, CheckCircle, Clock, Zap, ArrowUpRight } from "lucide-react";
+import { Activity, CheckCircle, Clock, Zap } from "lucide-react";
 
 const STATS = [
   { label: "Active Services", value: "12", sub: "100% healthy", icon: Zap },
@@ -42,45 +42,45 @@ const RECENT_LOGS = [
 
 export function ObservabilitySection() {
   return (
-    <section className="border-b border-slate-200/80 bg-slate-50/50 py-16 md:py-24">
+    <section className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent">
               <Activity className="h-3.5 w-3.5" />
               Real-Time Telemetry
             </div>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">
               Observability
             </h2>
-            <p className="mt-3 max-w-xl text-base text-slate-600">
+            <p className="mt-3 max-w-xl text-base text-muted">
               Deep inspection into every API call, token usage spike, retrieval
               chunk match, and tool execution error.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="flex items-center gap-2 rounded-lg bg-success/10 border border-success/20 px-3 py-1.5 text-xs font-medium text-success">
+            <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
             Global Cluster: All Systems Operational
           </div>
         </div>
 
         {/* Dashboard Card Container */}
-        <div className="mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+        <div className="mt-10 overflow-hidden rounded-3xl border border-line bg-surface shadow-xl transition-colors duration-fast">
           {/* Top Metric Bar */}
-          <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 border-b border-slate-200 sm:grid-cols-4 sm:divide-y-0">
+          <div className="grid grid-cols-2 divide-x divide-y divide-line border-b border-line sm:grid-cols-4 sm:divide-y-0">
             {STATS.map((stat) => {
               const Icon = stat.icon;
               return (
                 <div key={stat.label} className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between text-slate-400">
+                  <div className="flex items-center justify-between text-muted">
                     <span className="text-xs font-medium">{stat.label}</span>
-                    <Icon className="h-4 w-4 text-slate-500" />
+                    <Icon className="h-4 w-4 text-muted" />
                   </div>
-                  <div className="mt-2 font-display text-2xl font-bold text-slate-900 sm:text-3xl">
+                  <div className="mt-2 font-display text-2xl font-bold text-text sm:text-3xl">
                     {stat.value}
                   </div>
-                  <div className="mt-1 text-[11px] font-medium text-emerald-600">
+                  <div className="mt-1 text-[11px] font-medium text-success">
                     {stat.sub}
                   </div>
                 </div>
@@ -91,10 +91,10 @@ export function ObservabilitySection() {
           {/* Simulated Telemetry Timeline Chart */}
           <div className="p-6 sm:p-8">
             <div className="flex items-center justify-between">
-              <span className="font-display text-sm font-bold text-slate-800">
+              <span className="font-display text-sm font-bold text-text">
                 Hourly Execution Volume & Latency Curve
               </span>
-              <span className="font-mono text-xs text-slate-400">
+              <span className="font-mono text-xs text-muted">
                 Last 24 Hours
               </span>
             </div>
@@ -114,9 +114,9 @@ export function ObservabilitySection() {
                 </defs>
 
                 {/* Horizontal Grid lines */}
-                <line x1="0" y1="40" x2="800" y2="40" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="140" x2="800" y2="140" stroke="#f1f5f9" strokeWidth="1" />
+                <line x1="0" y1="40" x2="800" y2="40" stroke="var(--color-line)" strokeWidth="1" />
+                <line x1="0" y1="90" x2="800" y2="90" stroke="var(--color-line)" strokeWidth="1" />
+                <line x1="0" y1="140" x2="800" y2="140" stroke="var(--color-line)" strokeWidth="1" />
 
                 {/* Area under curve */}
                 <path
@@ -140,7 +140,7 @@ export function ObservabilitySection() {
               </svg>
 
               {/* Time stamps */}
-              <div className="mt-3 flex justify-between font-mono text-[10px] text-slate-400">
+              <div className="mt-3 flex justify-between font-mono text-[10px] text-muted">
                 <span>00:00</span>
                 <span>04:00</span>
                 <span>08:00</span>
@@ -153,29 +153,29 @@ export function ObservabilitySection() {
           </div>
 
           {/* Live Request Log Feed */}
-          <div className="border-t border-slate-100 bg-slate-50/50 p-6">
-            <div className="mb-3 text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
+          <div className="border-t border-line bg-ink/40 p-6">
+            <div className="mb-3 text-xs font-mono font-bold uppercase tracking-wider text-muted">
               Live Execution Traces
             </div>
             <div className="space-y-2">
               {RECENT_LOGS.map((log, i) => (
                 <div
                   key={i}
-                  className="flex flex-wrap items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs shadow-2xs"
+                  className="flex flex-wrap items-center justify-between rounded-xl border border-line bg-surface px-4 py-2.5 text-xs shadow-2xs"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-600">
+                    <span className="rounded bg-success/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-success">
                       {log.status} OK
                     </span>
-                    <span className="font-mono text-slate-800 font-medium">
+                    <span className="font-mono text-text font-medium">
                       {log.endpoint}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
+                  <div className="flex items-center gap-4 text-muted font-mono text-[11px]">
                     <span>{log.latency}</span>
                     <span>{log.tokens} tokens</span>
-                    <span className="text-slate-400">{log.time}</span>
+                    <span className="text-muted/70">{log.time}</span>
                   </div>
                 </div>
               ))}

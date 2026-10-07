@@ -10,6 +10,7 @@ import { signOut } from "next-auth/react";
 import { Menu, ChevronRight, LogOut, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // ── Breadcrumb helpers ───────────────────────────────────────────────────────
 
@@ -227,6 +228,7 @@ export function Topbar({ user, onMenuOpen }: TopbarProps) {
           <Plus size={13} className="text-accent" />
           <span>New Service</span>
         </Link>
+        <ThemeToggle />
         <UserMenu user={user} />
       </div>
     </header>

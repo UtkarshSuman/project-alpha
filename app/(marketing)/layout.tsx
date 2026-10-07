@@ -1,10 +1,10 @@
-// FEATURE: Marketing Layout — clean studio canvas wrapper with responsive navbar and footer
+// FEATURE: Marketing Layout — responsive layout using semantic theme tokens for light & dark mode
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f9fa] text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div className="flex min-h-screen flex-col bg-ink text-text antialiased selection:bg-accent/25 selection:text-text transition-colors duration-fast">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

@@ -90,33 +90,33 @@ export function DeveloperExperience() {
   };
 
   return (
-    <section className="border-b border-slate-200/80 bg-slate-50/50 py-16 md:py-24">
+    <section className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent">
               <Terminal className="h-3.5 w-3.5" />
               API-First Infrastructure
             </div>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">
               Developer Experience
             </h2>
-            <p className="mt-3 max-w-xl text-base text-slate-600">
+            <p className="mt-3 max-w-xl text-base text-muted">
               Every configured service exposes a single predictable endpoint.
               No complex SDK orchestration or token management needed.
             </p>
           </div>
 
           {/* Language selector tabs */}
-          <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+          <div className="flex items-center rounded-xl border border-line bg-surface p-1 shadow-sm">
             {(Object.keys(SNIPPETS) as LangKey[]).map((lang) => (
               <button
                 key={lang}
                 onClick={() => setActiveLang(lang)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   activeLang === lang
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-accent text-white shadow-sm"
+                    : "text-muted hover:text-text"
                 }`}
               >
                 {SNIPPETS[lang].label}

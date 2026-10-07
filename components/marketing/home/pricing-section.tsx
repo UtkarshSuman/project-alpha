@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, ArrowRight, ShieldCheck } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 
 const BILLING_TABS = ["Service executions", "API usage", "API scale"];
 
@@ -82,30 +82,30 @@ export function PricingSection() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <section id="pricing" className="border-b border-slate-200/80 bg-white py-16 md:py-24">
+    <section id="pricing" className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent">
             Transparent Pricing
           </p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl">
             Pricing
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-muted sm:text-lg">
             Predictable billing aligned with real service runs. No surprise seat
             penalties or hidden egress fees.
           </p>
 
           {/* Billing Mode Tabs */}
-          <div className="mt-8 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+          <div className="mt-8 inline-flex rounded-xl border border-line bg-surface p-1">
             {BILLING_TABS.map((tab, idx) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(idx)}
                 className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
                   activeTab === idx
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-surface-hover text-text shadow-sm"
+                    : "text-muted hover:text-text"
                 }`}
               >
                 {tab}
@@ -121,56 +121,56 @@ export function PricingSection() {
               key={tier.name}
               className={`relative flex flex-col justify-between rounded-3xl border p-6 transition-all duration-200 ${
                 tier.highlight
-                  ? "border-blue-600 bg-blue-50/20 shadow-xl ring-2 ring-blue-500/20"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md"
+                  ? "border-accent bg-accent/5 shadow-xl ring-2 ring-accent/20"
+                  : "border-line bg-surface hover:border-text/30 hover:bg-surface-hover hover:shadow-md"
               }`}
             >
               {tier.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-sm">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-sm">
                   Most Popular
                 </div>
               )}
 
               <div>
-                <h3 className="font-display text-lg font-bold text-slate-900">
+                <h3 className="font-display text-lg font-bold text-text">
                   {tier.name}
                 </h3>
-                <p className="mt-1 text-xs text-slate-500 min-h-[32px]">
+                <p className="mt-1 text-xs text-muted min-h-[32px]">
                   {tier.description}
                 </p>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-display text-3xl font-bold tracking-tight text-slate-900">
+                  <span className="font-display text-3xl font-bold tracking-tight text-text">
                     {tier.price}
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-muted font-medium">
                     {tier.cadence}
                   </span>
                 </div>
 
-                <div className="mt-2 font-mono text-xs font-semibold text-blue-600">
+                <div className="mt-2 font-mono text-xs font-semibold text-accent">
                   {tier.quota}
                 </div>
 
-                <div className="my-5 border-t border-slate-100" />
+                <div className="my-5 border-t border-line" />
 
-                <ul className="space-y-2.5 text-xs text-slate-600">
+                <ul className="space-y-2.5 text-xs text-muted">
                   {tier.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
-                      <span>{f}</span>
+                      <Check className="h-4 w-4 shrink-0 text-success mt-0.5" />
+                      <span className="text-text/90">{f}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-slate-100">
+              <div className="mt-8 pt-4 border-t border-line">
                 <Link
                   href={tier.ctaHref}
                   className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-semibold transition-all ${
                     tier.highlight
-                      ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                      : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-300"
+                      ? "bg-accent text-white shadow-sm hover:brightness-110"
+                      : "border border-line bg-surface text-text hover:bg-surface-hover"
                   }`}
                 >
                   {tier.ctaText}
