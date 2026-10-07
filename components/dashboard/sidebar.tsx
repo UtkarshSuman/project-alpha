@@ -6,6 +6,7 @@
 // (prohibited by DESIGN.md §11).
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,12 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   X,
+  Workflow,
+  MessageSquare,
+  Clock,
+  Database,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -28,13 +34,36 @@ type SidebarProps = {
   onCollapseToggle: () => void;
 };
 
-const navSections = [
+type NavSubItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+};
+
+type NavLink = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  subItems?: NavSubItem[];
+};
+
+const navSections: { label: string; links: NavLink[] }[] = [
   {
     label: "Platform",
     links: [
       { href: "/dashboard", label: "Overview", icon: LayoutGrid },
-      { href: "/chatbots", label: "Chatbots", icon: Bot },
+      {
+        href: "/chatbots",
+        label: "Chatbots",
+        icon: Bot,
+        subItems: [
+          { href: "/chatbots", label: "Simple", icon: MessageSquare },
+          { href: "/chatbots/short-term", label: "Short-term", icon: Clock },
+          { href: "/chatbots/long-term", label: "Long-term", icon: Database },
+        ],
+      },
       { href: "/tool-agents", label: "Tool Agents", icon: Zap },
+      { href: "/automation-agents", label: "Automations", icon: Workflow },
     ],
   },
   {
@@ -47,22 +76,50 @@ const navSections = [
   },
 ];
 
+function isSubItemActive(subHref: string, currentPath: string): boolean {
+  if (subHref === "/chatbots/short-term") {
+    return (
+      currentPath === "/chatbots/short-term" ||
+      currentPath.startsWith("/chatbots/short-term/")
+    );
+  }
+  if (subHref === "/chatbots/long-term") {
+    return (
+      currentPath === "/chatbots/long-term" ||
+      currentPath.startsWith("/chatbots/long-term/")
+    );
+  }
+  if (subHref === "/chatbots") {
+    return (
+      currentPath === "/chatbots" ||
+      (currentPath.startsWith("/chatbots/") &&
+        !currentPath.startsWith("/chatbots/short-term") &&
+        !currentPath.startsWith("/chatbots/long-term") &&
+        !currentPath.startsWith("/chatbots/overview"))
+    );
+  }
+  return currentPath === subHref || currentPath.startsWith(subHref + "/");
+}
+
 function NavItem({
   href,
   label,
   icon: Icon,
   active,
   collapsed,
+  onClick,
 }: {
   href: string;
   label: string;
   icon: React.ElementType;
   active: boolean;
   collapsed: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       title={collapsed ? label : undefined}
       className={cn(
         "group flex items-center rounded-md transition-colors duration-fast outline-none",
@@ -85,6 +142,205 @@ function NavItem({
         <span className="truncate text-sm">{label}</span>
       )}
     </Link>
+  );
+}
+
+function NavDropdownItem({
+  item,
+  collapsed,
+  currentPath,
+  onClose,
+}: {
+  item: NavLink;
+  collapsed: boolean;
+  currentPath: string;
+  onClose?: () => void;
+}) {
+  const isParentActive = currentPath.startsWith(item.href);
+  const [isOpen, setIsOpen] = useState(() => isParentActive);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (currentPath.startsWith(item.href)) {
+      setIsOpen(true);
+    }
+  }, [currentPath, item.href]);
+
+  useEffect(() => {
+    setPopoverOpen(false);
+  }, [collapsed]);
+
+  const handleRailClick = () => {
+    if (!popoverOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopoverPos({
+        top: Math.max(8, rect.top),
+        left: rect.right + 8,
+      });
+      setPopoverOpen(true);
+    } else {
+      setPopoverOpen(false);
+    }
+  };
+
+  const Icon = item.icon;
+
+  if (collapsed) {
+    return (
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={handleRailClick}
+          title={item.label}
+          aria-label={item.label}
+          aria-haspopup="true"
+          aria-expanded={popoverOpen}
+          className={cn(
+            "group flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-fast outline-none",
+            "focus-visible:ring-2 focus-visible:ring-accent-2 focus-visible:ring-offset-1",
+            isParentActive
+              ? "bg-surface-hover text-text"
+              : "text-muted hover:bg-surface-hover hover:text-text"
+          )}
+        >
+          <Icon
+            size={16}
+            className={cn(
+              "shrink-0 transition-colors duration-fast",
+              isParentActive ? "text-accent" : "text-muted group-hover:text-text"
+            )}
+            aria-hidden="true"
+          />
+        </button>
+
+        {popoverOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-transparent"
+              onClick={() => setPopoverOpen(false)}
+            />
+            <div
+              style={{ top: popoverPos.top, left: popoverPos.left }}
+              className="fixed z-50 w-44 rounded-lg border border-line bg-surface p-1.5 shadow-xl animate-in fade-in zoom-in-95"
+            >
+              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted/60">
+                {item.label}
+              </div>
+              <div className="space-y-0.5">
+                {item.subItems?.map((sub) => {
+                  const active = isSubItemActive(sub.href, currentPath);
+                  const SubIcon = sub.icon;
+                  return (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      onClick={() => {
+                        setPopoverOpen(false);
+                        onClose?.();
+                      }}
+                      className={cn(
+                        "group flex h-8 items-center gap-2 rounded-md px-2 text-xs transition-colors duration-fast outline-none",
+                        "focus-visible:ring-2 focus-visible:ring-accent-2",
+                        active
+                          ? "bg-surface-hover text-accent font-medium"
+                          : "text-muted hover:bg-surface-hover hover:text-text"
+                      )}
+                    >
+                      <SubIcon
+                        size={13}
+                        className={cn(
+                          "shrink-0 transition-colors duration-fast",
+                          active ? "text-accent" : "text-muted group-hover:text-text"
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{sub.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-0.5">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        className={cn(
+          "group flex w-full items-center rounded-md transition-colors duration-fast outline-none",
+          "focus-visible:ring-2 focus-visible:ring-accent-2 focus-visible:ring-offset-1",
+          "h-9 gap-2.5 px-3",
+          isParentActive
+            ? "bg-surface-hover text-text"
+            : "text-muted hover:bg-surface-hover hover:text-text"
+        )}
+      >
+        <Icon
+          size={16}
+          className={cn(
+            "shrink-0 transition-colors duration-fast",
+            isParentActive ? "text-accent" : "text-muted group-hover:text-text"
+          )}
+          aria-hidden="true"
+        />
+        <span className="truncate text-sm">{item.label}</span>
+        <ChevronDown
+          size={14}
+          className={cn(
+            "ml-auto shrink-0 text-muted transition-transform duration-200 group-hover:text-text",
+            isOpen && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && item.subItems && (
+        <div
+          role="group"
+          aria-label={`${item.label} services`}
+          className="ml-4 pl-3.5 border-l border-line/60 space-y-0.5 py-1"
+        >
+          {item.subItems.map((sub) => {
+            const active = isSubItemActive(sub.href, currentPath);
+            const SubIcon = sub.icon;
+            return (
+              <Link
+                key={sub.href}
+                href={sub.href}
+                onClick={onClose}
+                className={cn(
+                  "group flex h-7 items-center gap-2 rounded-md px-2 text-xs transition-colors duration-fast outline-none",
+                  "focus-visible:ring-2 focus-visible:ring-accent-2",
+                  active
+                    ? "bg-surface-hover text-accent font-medium"
+                    : "text-muted hover:bg-surface-hover hover:text-text"
+                )}
+              >
+                <SubIcon
+                  size={12}
+                  className={cn(
+                    "shrink-0 transition-colors duration-fast",
+                    active ? "text-accent" : "text-muted/70 group-hover:text-text"
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="truncate">{sub.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -160,16 +416,27 @@ function SidebarContent({
                 collapsed && !isMobile ? "px-2.5" : "px-2"
               )}
             >
-              {section.links.map(({ href, label, icon }) => (
-                <NavItem
-                  key={href}
-                  href={href}
-                  label={label}
-                  icon={icon}
-                  active={isActive(href)}
-                  collapsed={collapsed && !isMobile}
-                />
-              ))}
+              {section.links.map((link) =>
+                link.subItems ? (
+                  <NavDropdownItem
+                    key={link.href}
+                    item={link}
+                    collapsed={collapsed && !isMobile}
+                    currentPath={pathname}
+                    onClose={onClose}
+                  />
+                ) : (
+                  <NavItem
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    icon={link.icon}
+                    active={isActive(link.href)}
+                    collapsed={collapsed && !isMobile}
+                    onClick={onClose}
+                  />
+                )
+              )}
             </div>
           </div>
         ))}
