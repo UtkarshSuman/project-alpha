@@ -29,13 +29,12 @@ export default async function DashboardOverview() {
     .findUnique({ where: { id: orgId } })
     .catch(() => null);
 
-  const currentOrg = org ?? {
+  const currentOrg: { id: string; name: string; plan: string; messagesUsedThisPeriod: number; messageQuota: number } = org ?? {
     id: orgId,
     name: "Workspace",
     plan: "FREE" as const,
     messagesUsedThisPeriod: 0,
     messageQuota: 100,
-    chatbotsLimit: 1,
   };
 
   const [
@@ -194,7 +193,7 @@ export default async function DashboardOverview() {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {chatbots.map((bot) => (
+              {chatbots.map((bot: (typeof chatbots)[number]) => (
                 <Link
                   key={bot.id}
                   href={`/chatbots/${bot.id}`}
@@ -253,7 +252,7 @@ export default async function DashboardOverview() {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {toolAgents.map((agent) => (
+              {toolAgents.map((agent: (typeof toolAgents)[number]) => (
                 <Link
                   key={agent.id}
                   href={`/tool-agents/${agent.id}`}

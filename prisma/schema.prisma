@@ -66,9 +66,16 @@ model Organization {
   name        String
   createdAt   DateTime     @default(now())
 
-  // Billing identity only — the actual plan/quota/subscription lives on
-  // Service now (each service is independently billed).
-  razorpayCustomerId String? @unique
+  // Razorpay identity for the org-level subscription
+  razorpayCustomerId     String?  @unique
+  razorpaySubscriptionId String?  @unique
+  plan                   Plan     @default(FREE)
+  planStatus             String?               // "active" | "past_due" | "cancelled"
+  currentPeriodEnd       DateTime?
+
+  // Org-level aggregate quota (used by billing page + rate-limit checks)
+  messageQuota           Int      @default(100)
+  messagesUsedThisPeriod Int      @default(0)
 
   chatbots    Chatbot[]
   invites     Invite[]
@@ -314,7 +321,8 @@ model ToolAgent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tools ToolDefinition[]
+  tools         ToolDefinition[]
+  conversations AgentConversation[]
 }
 
 model ToolDefinition {
@@ -403,4 +411,39 @@ model LeadRecord {
   createdAt DateTime @default(now())
 
   @@index([automationAgentId, createdAt])
+}
+
+// ============================================================================
+// FEATURE: Tool Agent conversation history — tracks multi-turn sessions so
+// the LLM can maintain context across user messages within a session.
+// Mirrors Chatbot Conversation/Message pattern but scoped to ToolAgent.
+// ============================================================================
+
+model AgentConversation {
+  id          String        @id @default(cuid())
+  toolAgentId String
+  toolAgent   ToolAgent     @relation(fields: [toolAgentId], references: [id], onDelete: Cascade)
+
+  sessionId      String
+  memorySummary  String?   @db.Text  // rolling compressed summary of older turns
+  summarizedUpTo DateTime?           // timestamp of last message included in memorySummary
+
+  createdAt DateTime @default(now())
+
+  messages AgentMessage[]
+
+  @@index([toolAgentId, sessionId])
+}
+
+model AgentMessage {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role    String  // "user" | "assistant" | "tool"
+  content String  @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
 }

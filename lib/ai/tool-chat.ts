@@ -16,6 +16,7 @@
 // ============================================================================
 
 import Groq from "groq-sdk";
+import type { ChatCompletionTool } from "groq-sdk/resources/chat/completions";
 import { assertUrlIsSafe } from "@/lib/security/ssrf-guard";
 import type { ToolDefinition } from "@prisma/client";
 
@@ -25,8 +26,8 @@ const MAX_TOOL_ROUNDS = 3;
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_RESPONSE_BYTES = 100_000; // 100KB cap on tool response size fed back to the LLM
 
-function toOpenAiTool(t: ToolDefinition) {
-  return { type: "function" as const, function: { name: t.name, description: t.description, parameters: t.paramsSchema as object } };
+function toOpenAiTool(t: ToolDefinition): ChatCompletionTool {
+  return { type: "function" as const, function: { name: t.name, description: t.description, parameters: t.paramsSchema as Record<string, unknown> } };
 }
 
 async function executeTool(tool: ToolDefinition, args: Record<string, unknown>): Promise<string> {
