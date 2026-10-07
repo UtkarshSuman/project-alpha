@@ -21,7 +21,7 @@ export default async function NewServicePage({
   if (serviceid === "tool") {
     redirect("/tool-agents?create=1");
   }
-  if (serviceId === "automation") {
+  if (serviceid === "automation") {
     redirect("/automation-agents?create=1");
   }
 

@@ -17,7 +17,7 @@ import { generateToolChatCompletionStream } from "@/lib/ai/tool-chat";
 import { summarizeIncrement } from "@/lib/ai/summarize-conversation";
 import { nanoid } from "nanoid";
 
-type RouteParams = { params: Promise<{ serviceId: string }> };
+type RouteParams = { params: Promise<{ serviceid: string }> };
 
 const HISTORY_LIMIT = 10;
 const SUMMARIZE_TRIGGER = 20;
@@ -36,7 +36,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request, { params }: RouteParams) {
-  const { serviceId } = await params;
+  const { serviceid: serviceId } = await params;
 
   try {
     const authHeader = req.headers.get("authorization");
