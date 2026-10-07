@@ -47,6 +47,15 @@ export const SERVICES: Service[] = [
     status: "coming-soon",
     accentColor: "#8b92a6",
   },
+    {
+    id: "automation",
+    name: "Lead Automation",
+    tagline: "AI that qualifies and follows up on every lead, instantly.",
+    description: "Embed a form on your site. Every submission gets AI-qualified against your criteria and a personalized follow-up email, automatically.",
+    icon: "Zap",
+    status: "available",
+    accentColor: "#f2a93b",
+  },
   {
     id: "automation",
     name: "AI Automation",

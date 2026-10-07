@@ -33,6 +33,7 @@ export function ChatbotTabs({
     { href: `${basePath}/${chatbotid}`, label: "Overview" },
     { href: `${basePath}/${chatbotid}/playground`, label: "Playground" },
     { href: `${basePath}/${chatbotid}/analytics`, label: "Analytics" },
+    { href: `${basePath}/${chatbotid}/api-keys`, label: "API Keys" },
     ...extraTabs,
     { href: `${basePath}/${chatbotid}/settings`, label: "Settings" },
   ];

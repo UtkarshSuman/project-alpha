@@ -7,7 +7,7 @@
   const scriptTag = document.currentScript;
   const serviceId = scriptTag.getAttribute("data-service-id");
   const apiKey = scriptTag.getAttribute("data-api-key");
-  const apiBase = scriptTag.getAttribute("data-api-base") || "https://yourapp.com";
+  const apiBase = scriptTag.getAttribute("data-api-base") || "https://uveriq.vercel.app";
   const targetSelector = scriptTag.getAttribute("data-target"); // optional: render inline instead of floating
 
   if (!serviceId || !apiKey) {

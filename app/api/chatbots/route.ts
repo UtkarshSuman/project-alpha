@@ -1,8 +1,12 @@
 // ============================================================================
 // FEATURE: Chatbot list + create
-// GET  /api/chatbots   -> list all chatbots in the caller's org
+// GET  /api/chatbots   -> list all SIMPLE chatbots in the caller's org
 // POST /api/chatbots   -> create a new chatbot (status: DRAFT until a
 //                          document is uploaded and ingestion completes)
+//
+// Free-plan cap counts FREE-plan Services across ALL types (RAG, Tool Agent,
+// Automation), not just chatbots — see Service model. Plan/quota now live
+// on Service, not Organization (per-service billing migration).
 // ============================================================================
 
 import { NextResponse } from "next/server";
@@ -16,7 +20,7 @@ export async function GET() {
     const { orgId } = await requireOrg();
 
     const chatbots = await prisma.chatbot.findMany({
-      where: { orgId },
+      where: { orgId, memoryType: "simple" },
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { documents: true } },
@@ -47,31 +51,25 @@ export async function POST(req: Request) {
       );
     }
 
-    const org = await prisma.organization.findUnique({
-      where: { id: orgId },
-      include: { _count: { select: { chatbots: true } } },
-    });
+    // Enforce free-plan limits — counts FREE-plan services across every
+    // type (RAG, Tool Agent, Automation), not just chatbots, since the cap
+    // is meant to prevent stacking free quota by spreading across types.
+    const freeServiceCount = await prisma.service.count({ where: { orgId, plan: "FREE" } });
 
-    // Enforce free-plan limits — fully configurable via env, see
-    // lib/billing/config.ts. Set FREE_PLAN_CHATBOT_LIMIT=0 (or
-    // FREE_PLAN_ENABLED=false) to stop free orgs creating chatbots at all.
-    if (org?.plan === "FREE") {
-      if (!FREE_PLAN_ENABLED || FREE_PLAN_CHATBOT_LIMIT <= 0) {
+    if (freeServiceCount >= FREE_PLAN_CHATBOT_LIMIT) {
+      if (!FREE_PLAN_ENABLED) {
         return NextResponse.json(
           { error: "The Free plan is currently unavailable. Please upgrade to a paid plan to create a chatbot." },
           { status: 403 }
         );
       }
-      if ((org._count.chatbots ?? 0) >= FREE_PLAN_CHATBOT_LIMIT) {
-        return NextResponse.json(
-          {
-            error: `Free plan is limited to ${FREE_PLAN_CHATBOT_LIMIT} chatbot${FREE_PLAN_CHATBOT_LIMIT === 1 ? "" : "s"}. Upgrade to create more.`,
-          },
-          { status: 403 }
-        );
-      }
+      return NextResponse.json(
+        {
+          error: `Free plan is limited to ${FREE_PLAN_CHATBOT_LIMIT} free service${FREE_PLAN_CHATBOT_LIMIT === 1 ? "" : "s"} total across all types. Upgrade an existing one, or create this as a paid service.`,
+        },
+        { status: 403 }
+      );
     }
-
 
     const service = await prisma.service.create({
       data: { orgId, type: "RAG", name: parsed.data.name },
@@ -82,6 +80,7 @@ export async function POST(req: Request) {
         orgId,
         serviceId: service.id,
         name: parsed.data.name,
+        memoryType: parsed.data.memoryType,
         status: "DRAFT",
       },
     });

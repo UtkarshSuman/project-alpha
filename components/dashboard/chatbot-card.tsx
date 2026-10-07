@@ -1,8 +1,8 @@
 // ============================================================================
-// FEATURE: Chatbot card shown in the dashboard grid
-// Displays status badge, document and key counts, and a hover quick-actions menu.
+// FEATURE: Chatbot card with quick-actions dropdown — now parameterized with
+// baseHref so simple/short-term/long-term lists all link into the correct
+// route namespace (main click, AND every link inside the dropdown menu).
 // ============================================================================
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -28,6 +28,7 @@ type ChatbotCardProps = {
   documentCount: number;
   apiKeyCount: number;
   createdAt?: string | Date;
+  baseHref?: string;
 };
 
 export function ChatbotCard({
@@ -37,6 +38,7 @@ export function ChatbotCard({
   documentCount,
   apiKeyCount,
   createdAt,
+  baseHref = "/chatbots",
 }: ChatbotCardProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -71,7 +73,7 @@ export function ChatbotCard({
 
   return (
     <div
-      onClick={() => router.push(`/chatbots/${id}`)}
+      onClick={() => router.push(`${baseHref}/${id}`)}
       className="group relative flex flex-col justify-between rounded-lg border border-line bg-surface p-5 cursor-pointer transition-all duration-fast hover:border-line-hover hover:bg-surface-hover hover:shadow-elevate-sm"
     >
       <div>
@@ -103,7 +105,7 @@ export function ChatbotCard({
                   className="absolute right-0 top-full z-50 mt-1 w-44 rounded-md border border-line bg-surface p-1 shadow-elevate-md text-xs"
                 >
                   <Link
-                    href={`/chatbots/${id}/playground`}
+                    href={`${baseHref}/${id}/playground`}
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-muted transition-colors duration-fast hover:bg-surface-hover hover:text-text"
@@ -112,7 +114,7 @@ export function ChatbotCard({
                     Playground
                   </Link>
                   <Link
-                    href={`/chatbots/${id}/analytics`}
+                    href={`${baseHref}/${id}/analytics`}
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-muted transition-colors duration-fast hover:bg-surface-hover hover:text-text"
@@ -121,7 +123,7 @@ export function ChatbotCard({
                     Analytics
                   </Link>
                   <Link
-                    href={`/chatbots/${id}/settings`}
+                    href={`${baseHref}/${id}/settings`}
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-muted transition-colors duration-fast hover:bg-surface-hover hover:text-text"

@@ -37,7 +37,7 @@
   const scriptTag = document.currentScript;
   const chatbotId = scriptTag.getAttribute("data-chatbot-id");
   const apiKey = scriptTag.getAttribute("data-api-key");
-  const apiBase = scriptTag.getAttribute("data-api-base") || "https://yourapp.com";
+  const apiBase = scriptTag.getAttribute("data-api-base") || "https://uveriq.vercel.app";
 
   if (!chatbotId || !apiKey) {
     console.error("[Uveriq widget] Missing data-chatbot-id or data-api-key");

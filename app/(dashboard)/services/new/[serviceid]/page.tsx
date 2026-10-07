@@ -21,6 +21,9 @@ export default async function NewServicePage({
   if (serviceid === "tool") {
     redirect("/tool-agents?create=1");
   }
+  if (serviceId === "automation") {
+    redirect("/automation-agents?create=1");
+  }
 
   const service = SERVICES.find((s) => s.id === serviceid);
   if (!service) {

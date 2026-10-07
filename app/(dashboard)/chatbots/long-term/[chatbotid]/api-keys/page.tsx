@@ -1,6 +1,6 @@
 // ============================================================================
-// FEATURE: API Keys tab for simple (RAG) chatbot
-// Dedicated full-page API key manager — same UX as the keys shown on Overview.
+// FEATURE: API Keys tab for long-term chatbot
+// Dedicated full-page API key manager — same UX as simple chatbot's keys tab.
 // Keys are scoped to this chatbot's Service (unique per chatbot, not shared).
 // ============================================================================
 
@@ -10,10 +10,10 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrg } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
 import { ChatbotTabs } from "@/components/dashboard/chatbot-tabs";
-import { ChatbotKeysSection } from "../keys-section";
+import { ChatbotKeysSection } from "../../../[chatbotid]/keys-section";
 import { ArrowLeft, Bot, Key } from "lucide-react";
 
-export default async function ApiKeysPage({
+export default async function LongTermApiKeysPage({
   params,
 }: {
   params: Promise<{ chatbotid: string }>;
@@ -35,7 +35,7 @@ export default async function ApiKeysPage({
     },
   });
 
-  if (!chatbot || chatbot.orgId !== orgId || chatbot.memoryType !== "simple") notFound();
+  if (!chatbot || chatbot.orgId !== orgId || chatbot.memoryType !== "long_term") notFound();
 
   const activeKeys = chatbot.service.apiKeys;
 
@@ -44,11 +44,11 @@ export default async function ApiKeysPage({
       {/* ── Top Bar: Back Link & Header ──────────────────────── */}
       <div>
         <Link
-          href="/chatbots"
+          href="/chatbots/long-term"
           className="inline-flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-text mb-3"
         >
           <ArrowLeft size={13} />
-          Back to Chatbots
+          Back to Persistent Memory Chatbots
         </Link>
 
         <div className="flex items-center gap-3">
@@ -61,14 +61,18 @@ export default async function ApiKeysPage({
               <Badge status={chatbot.status} />
             </div>
             <p className="text-xs text-muted mt-0.5">
-              Manage API keys to authenticate requests for this chatbot.
+              Manage API keys to authenticate requests for this persistent-memory chatbot.
             </p>
           </div>
         </div>
       </div>
 
       {/* ── Subpage Tab Navigation ──────────────────────────── */}
-      <ChatbotTabs chatbotid={chatbotid} />
+      <ChatbotTabs
+        chatbotid={chatbotid}
+        basePath="/chatbots/long-term"
+        extraTabs={[{ href: `/chatbots/long-term/${chatbotid}/memories`, label: "Memories" }]}
+      />
 
       {/* ── API Keys Manager ────────────────────────────────── */}
       <div className="max-w-3xl">
