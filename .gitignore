@@ -1,4 +1,9 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+testing
+/coverage
+
+# next.js
+/.next/
+/out/# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -10,12 +15,7 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
+# 
 
 # production
 /build
@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 myreadme.md
+
