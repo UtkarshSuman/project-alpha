@@ -13,7 +13,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { createChatbotSchema } from "@/lib/validations/chatbot";
-import { FREE_PLAN_ENABLED, FREE_PLAN_CHATBOT_LIMIT } from "@/lib/billing/config";
+import { checkServiceCreationLimit } from "@/lib/billing/service-limits";
+import { PLAN_QUOTAS } from "@/lib/billing/plans";
 
 export async function GET() {
   try {
@@ -51,28 +52,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // Enforce free-plan limits — counts FREE-plan services across every
-    // type (RAG, Tool Agent, Automation), not just chatbots, since the cap
-    // is meant to prevent stacking free quota by spreading across types.
-    const freeServiceCount = await prisma.service.count({ where: { orgId, plan: "FREE" } });
-
-    if (freeServiceCount >= FREE_PLAN_CHATBOT_LIMIT) {
-      if (!FREE_PLAN_ENABLED) {
-        return NextResponse.json(
-          { error: "The Free plan is currently unavailable. Please upgrade to a paid plan to create a chatbot." },
-          { status: 403 }
-        );
-      }
-      return NextResponse.json(
-        {
-          error: `Free plan is limited to ${FREE_PLAN_CHATBOT_LIMIT} free service${FREE_PLAN_CHATBOT_LIMIT === 1 ? "" : "s"} total across all types. Upgrade an existing one, or create this as a paid service.`,
-        },
-        { status: 403 }
-      );
+    // Enforce plan limits based on caller org's plan (PRO/SCALE are unlimited)
+    const limitCheck = await checkServiceCreationLimit(orgId);
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.error }, { status: 403 });
     }
 
     const service = await prisma.service.create({
-      data: { orgId, type: "RAG", name: parsed.data.name },
+      data: {
+        orgId,
+        type: "RAG",
+        name: parsed.data.name,
+        plan: limitCheck.plan,
+        messageQuota: PLAN_QUOTAS[limitCheck.plan],
+      },
     });
 
     const chatbot = await prisma.chatbot.create({

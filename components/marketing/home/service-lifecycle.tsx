@@ -148,7 +148,7 @@ export function ServiceLifecycle() {
                     <div className="flex items-center gap-1.5">
                       <Icon
                         className={`h-4 w-4 ${
-                          isActive ? "text-accent" : "text-muted group-hover:text-text"
+                          isActive ? "text-accent" : "text-muted group-hover:text-accent"
                         }`}
                       />
                       <span className="font-mono text-xs font-bold tracking-wider">
@@ -161,7 +161,7 @@ export function ServiceLifecycle() {
                   </button>
 
                   {idx < STAGES.length - 1 && (
-                    <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-line" />
+                    <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-accent/30" />
                   )}
                 </div>
               );

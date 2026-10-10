@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { verifyPaymentSignature } from "@/lib/billing/verify-signature";
 import { PLAN_QUOTAS } from "@/lib/billing/plans";
+import { syncOrgServicesPlan } from "@/lib/billing/service-limits";
 import { Plan } from "@prisma/client";
 
 export async function POST(req: Request) {
@@ -44,6 +45,8 @@ export async function POST(req: Request) {
         messagesUsedThisPeriod: 0,
       },
     });
+
+    await syncOrgServicesPlan(orgId, typedPlan);
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { razorpay } from "@/lib/billing/razorpay";
 import { PLAN_QUOTAS } from "@/lib/billing/plans";
+import { syncOrgServicesPlan } from "@/lib/billing/service-limits";
 
 export async function POST() {
   try {
@@ -29,6 +30,8 @@ export async function POST() {
         razorpaySubscriptionId: null,
       },
     });
+
+    await syncOrgServicesPlan(orgId, "FREE");
 
     return NextResponse.json({ success: true });
   } catch (err) {

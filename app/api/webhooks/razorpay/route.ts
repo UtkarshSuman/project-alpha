@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { verifyWebhookSignature } from "@/lib/billing/verify-signature";
 import { planFromRazorpayPlanId, PLAN_QUOTAS } from "@/lib/billing/plans";
+import { syncOrgServicesPlan } from "@/lib/billing/service-limits";
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
             currentPeriodEnd: subscription.current_end ? new Date(subscription.current_end * 1000) : undefined,
           },
         });
+        await syncOrgServicesPlan(orgId, plan);
         break;
       }
 
@@ -61,6 +63,7 @@ export async function POST(req: Request) {
             razorpaySubscriptionId: null,
           },
         });
+        await syncOrgServicesPlan(orgId, "FREE");
         break;
       }
 

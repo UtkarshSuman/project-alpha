@@ -83,12 +83,17 @@ export function PricingSection() {
 
   return (
     <section id="pricing" className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
+      {/* Brand gradient top accent */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent">
-            Transparent Pricing
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl">
+          <div className="mb-3 inline-flex items-center gap-2">
+            <div className="h-px w-8 brand-stripe opacity-80" />
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent">
+              Transparent Pricing
+            </p>
+            <div className="h-px w-8 brand-stripe opacity-80" />
+          </div>
+          <h2 className="mt-1 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl">
             Pricing
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted sm:text-lg">
@@ -122,11 +127,14 @@ export function PricingSection() {
               className={`relative flex flex-col justify-between rounded-3xl border p-6 transition-all duration-200 ${
                 tier.highlight
                   ? "border-accent bg-accent/5 shadow-xl ring-2 ring-accent/20"
-                  : "border-line bg-surface hover:border-text/30 hover:bg-surface-hover hover:shadow-md"
+                  : "border-line bg-surface hover:border-accent/30 hover:bg-surface-hover hover:shadow-md"
               }`}
             >
               {tier.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-sm">
+                <div
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-sm"
+                  style={{ background: "var(--gradient-cta)" }}
+                >
                   Most Popular
                 </div>
               )}
@@ -148,7 +156,7 @@ export function PricingSection() {
                   </span>
                 </div>
 
-                <div className="mt-2 font-mono text-xs font-semibold text-accent">
+                <div className="mt-2 font-mono text-xs font-semibold text-accent-2">
                   {tier.quota}
                 </div>
 
@@ -169,9 +177,10 @@ export function PricingSection() {
                   href={tier.ctaHref}
                   className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-semibold transition-all ${
                     tier.highlight
-                      ? "bg-accent text-white shadow-sm hover:brightness-110"
-                      : "border border-line bg-surface text-text hover:bg-surface-hover"
+                      ? "text-white shadow-sm hover:brightness-110"
+                      : "border border-line bg-surface text-text hover:bg-surface-hover hover:border-accent/30"
                   }`}
+                  style={tier.highlight ? { background: "var(--gradient-cta)" } : undefined}
                 >
                   {tier.ctaText}
                   <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

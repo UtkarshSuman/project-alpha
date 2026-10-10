@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   title: "Uveriq - AI services for retrieval, agents, automation, and CAG",
   description:
     "Build governed AI services for retrieval, agents, automation, and cache-augmented generation from one workspace.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

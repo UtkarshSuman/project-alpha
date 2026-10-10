@@ -18,7 +18,7 @@ export function CapabilitiesGrid() {
     <section className="border-b border-line bg-ink py-16 md:py-24 transition-colors duration-fast">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-2">
             Modular Intelligence
           </p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl">
@@ -33,11 +33,11 @@ export function CapabilitiesGrid() {
 
         {/* 6 Capabilities Bento Grid */}
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* 1. Knowledge */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 1. Knowledge — vivid green */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-accent/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-                <Database className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(67,160,71,0.12)" }}>
+                <Database className="h-5 w-5" style={{ color: "#43a047" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
                 Knowledge
@@ -51,7 +51,7 @@ export function CapabilitiesGrid() {
             {/* Visual Graphic */}
             <div className="mt-6 rounded-xl border border-line bg-ink/60 p-3.5 shadow-sm">
               <div className="flex items-center gap-2 border-b border-line pb-2 text-[11px] font-medium text-text">
-                <FileText className="h-3.5 w-3.5 text-blue-500" />
+                <FileText className="h-3.5 w-3.5" style={{ color: "#43a047" }} />
                 <span>handbook-2026.pdf</span>
                 <span className="ml-auto text-[10px] text-success font-mono">
                   100% Match
@@ -64,11 +64,11 @@ export function CapabilitiesGrid() {
             </div>
           </div>
 
-          {/* 2. Action */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 2. Action — teal */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-accent-2/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-                <Zap className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(0,172,193,0.12)" }}>
+                <Zap className="h-5 w-5" style={{ color: "#00acc1" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
                 Action
@@ -82,10 +82,10 @@ export function CapabilitiesGrid() {
             {/* Visual Graphic */}
             <div className="mt-6 rounded-xl border border-line bg-ink/60 p-3.5 shadow-sm">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-mono text-emerald-500 font-semibold">
+                <span className="font-mono font-semibold" style={{ color: "#00acc1" }}>
                   call_tool: cancel_order
                 </span>
-                <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-mono text-emerald-500">
+                <span className="rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: "rgba(0,172,193,0.12)", color: "#00acc1" }}>
                   CONFIRMED
                 </span>
               </div>
@@ -95,11 +95,11 @@ export function CapabilitiesGrid() {
             </div>
           </div>
 
-          {/* 3. Automation */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 3. Automation — yellow-green */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-accent/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
-                <Workflow className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(124,179,66,0.12)" }}>
+                <Workflow className="h-5 w-5" style={{ color: "#7cb342" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
                 Automation
@@ -115,7 +115,7 @@ export function CapabilitiesGrid() {
               <div className="flex items-center justify-between text-[10px]">
                 <span className="font-medium text-text">New Lead Trigger</span>
                 <ArrowRight className="h-3 w-3 text-muted" />
-                <span className="font-medium text-purple-500">AI Scoring</span>
+                <span className="font-medium" style={{ color: "#7cb342" }}>AI Scoring</span>
                 <ArrowRight className="h-3 w-3 text-muted" />
                 <span className="font-medium text-success">Send Email</span>
               </div>
@@ -125,11 +125,11 @@ export function CapabilitiesGrid() {
             </div>
           </div>
 
-          {/* 4. Memory */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 4. Memory — forest green */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-accent/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10 text-pink-500">
-                <Brain className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(46,125,50,0.12)" }}>
+                <Brain className="h-5 w-5" style={{ color: "#2e7d32" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
                 Memory
@@ -144,7 +144,7 @@ export function CapabilitiesGrid() {
             <div className="mt-6 rounded-xl border border-line bg-ink/60 p-3.5 shadow-sm">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-medium text-text">User Profile #92</span>
-                <span className="text-[10px] font-mono text-pink-500">Long-term</span>
+                <span className="text-[10px] font-mono text-accent">Long-term</span>
               </div>
               <div className="mt-2 text-[10px] text-muted">
                 Preferences: React 19, Turbopack, Prefers Dark UI
@@ -152,14 +152,14 @@ export function CapabilitiesGrid() {
             </div>
           </div>
 
-          {/* 5. Intelligence */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 5. Intelligence — teal */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-accent-2/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500">
-                <BarChart3 className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(0,131,143,0.12)" }}>
+                <BarChart3 className="h-5 w-5" style={{ color: "#00838f" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
-                Intelligence & Telemetry
+                Intelligence &amp; Telemetry
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-muted">
                 In-depth conversation analytics, token usage curves, user sentiment
@@ -171,21 +171,21 @@ export function CapabilitiesGrid() {
             <div className="mt-6 rounded-xl border border-line bg-ink/60 p-3.5 shadow-sm">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-medium text-text">Daily Volume</span>
-                <span className="font-mono text-cyan-500 font-bold">14,820 req</span>
+                <span className="font-mono font-bold" style={{ color: "#00acc1" }}>14,820 req</span>
               </div>
               <div className="mt-2 flex h-2 w-full gap-1 overflow-hidden rounded-full bg-surface">
-                <div className="h-full bg-blue-500" style={{ width: "65%" }} />
-                <div className="h-full bg-emerald-500" style={{ width: "25%" }} />
-                <div className="h-full bg-amber-500" style={{ width: "10%" }} />
+                <div className="h-full" style={{ width: "55%", background: "#43a047" }} />
+                <div className="h-full" style={{ width: "25%", background: "#00acc1" }} />
+                <div className="h-full" style={{ width: "20%", background: "#fb8c00" }} />
               </div>
             </div>
           </div>
 
-          {/* 6. Speed */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-text/40 hover:bg-surface-hover hover:shadow-md">
+          {/* 6. Speed — amber orange */}
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface p-6 transition-all hover:border-warning/40 hover:bg-surface-hover hover:shadow-md">
             <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500">
-                <Gauge className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(251,140,0,0.12)" }}>
+                <Gauge className="h-5 w-5" style={{ color: "#fb8c00" }} />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold text-text">
                 Speed (CAG Acceleration)
@@ -202,7 +202,7 @@ export function CapabilitiesGrid() {
                 <span className="text-muted">Standard Retrieval</span>
                 <span className="font-mono text-muted">1,450ms</span>
               </div>
-              <div className="mt-1 flex items-center justify-between text-[11px] font-semibold text-orange-500">
+              <div className="mt-1 flex items-center justify-between text-[11px] font-semibold" style={{ color: "#fb8c00" }}>
                 <span>Uveriq Warm Cache</span>
                 <span className="font-mono">92ms</span>
               </div>

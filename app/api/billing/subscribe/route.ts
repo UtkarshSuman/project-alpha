@@ -13,6 +13,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { Plan } from "@prisma/client";
 import { nanoid } from "nanoid";
+import { syncOrgServicesPlan } from "@/lib/billing/service-limits";
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
           messagesUsedThisPeriod: 0,
         },
       });
+      await syncOrgServicesPlan(orgId, plan);
       return NextResponse.json({ mock: true });
     }
 
