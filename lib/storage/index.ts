@@ -8,7 +8,23 @@ import { supabaseAdminClient as supabase } from "@/lib/db/supabase";
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "document-alpha";
 
+let bucketChecked = false;
+async function ensureBucket() {
+  if (bucketChecked) return;
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    if (!buckets?.some((b) => b.name === BUCKET)) {
+      await supabase.storage.createBucket(BUCKET, { public: false });
+    }
+    bucketChecked = true;
+  } catch (err) {
+    // If listing/creating bucket fails, proceed anyway and let upload surface error
+    console.warn("Storage ensureBucket notice:", err);
+  }
+}
+
 export async function uploadToStorage(key: string, buffer: Buffer, contentType: string) {
+  await ensureBucket();
   const { error } = await supabase.storage.from(BUCKET).upload(key, buffer, {
     contentType,
     upsert: true,

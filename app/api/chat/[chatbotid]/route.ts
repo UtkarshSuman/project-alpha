@@ -56,6 +56,7 @@ import { retrieveRelevantMemories } from "@/lib/ai/memory-retrieve";
 import { generateChatCompletionStream } from "@/lib/ai/chat";
 import { isOriginAllowed } from "@/lib/security/origin-check";
 import { inngest } from "@/lib/inngest/client";
+import { processDocument } from "@/lib/ai/ingest";
 import { requireOrg } from "@/lib/auth/session";
 import { nanoid } from "nanoid";
 
@@ -67,7 +68,7 @@ function corsHeaders() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Expose-Headers": "X-Session-Id, X-Request-Email",
+    "Access-Control-Expose-Headers": "X-Session-Id, X-Request-Email, X-Sources",
   };
 }
 
@@ -131,8 +132,43 @@ export async function POST(req: Request, { params }: RouteParams) {
       }
     }
 
-    if (chatbot.status !== "READY") {
-      return NextResponse.json({ error: "This chatbot isn't ready yet — no documents have finished processing." }, { status: 503, headers: corsHeaders() });
+    // Auto-process any pending documents for this chatbot so they are immediately available
+    const pendingDocs = await prisma.document.findMany({
+      where: {
+        chatbotId: chatbotid,
+        status: { in: ["PENDING", "PARSING", "EMBEDDING"] },
+      },
+    });
+    for (const doc of pendingDocs) {
+      await processDocument(doc.id).catch((err) =>
+        console.warn(`Auto-process document ${doc.id} warning:`, err)
+      );
+    }
+
+    const readyDocs = await prisma.document.findMany({
+      where: { chatbotId: chatbotid, status: "READY", enabled: true },
+    });
+
+    if (readyDocs.length > 0 && chatbot.status !== "READY") {
+      await prisma.chatbot.update({
+        where: { id: chatbotid },
+        data: { status: "READY" },
+      });
+      chatbot.status = "READY";
+    }
+
+    if (chatbot.status !== "READY" && readyDocs.length === 0) {
+      const allDocs = await prisma.document.findMany({ where: { chatbotId: chatbotid } });
+      if (allDocs.length === 0) {
+        return NextResponse.json(
+          { error: "No documents have been uploaded for this chatbot yet. Upload documents in the Overview tab to enable grounded answers." },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+      return NextResponse.json(
+        { error: "This chatbot's documents are still processing. Please try again shortly." },
+        { status: 503, headers: corsHeaders() }
+      );
     }
 
     const body = await req.json().catch(() => null);
@@ -161,6 +197,11 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     const chunks = await retrieveRelevantChunks(chatbotid, message);
     const hasContext = chunks.length > 0;
+    const sources = chunks.map((c) => ({
+      filename: c.filename,
+      similarity: Math.round(c.similarity * 100),
+    }));
+    const sourcesHeader = encodeURIComponent(JSON.stringify(sources));
 
     // --- Guardrail path ---
     if (!hasContext && chatbot.restrictToContext) {
@@ -184,7 +225,14 @@ export async function POST(req: Request, { params }: RouteParams) {
       });
 
       return new Response(stream, {
-        headers: { ...corsHeaders(), "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Session-Id": sessionId, "X-Request-Email": String(shouldRequestEmail) },
+        headers: {
+          ...corsHeaders(),
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Session-Id": sessionId,
+          "X-Request-Email": String(shouldRequestEmail),
+          "X-Sources": sourcesHeader,
+        },
       });
     }
 
@@ -274,7 +322,14 @@ ${hasContext ? `Use the following context to answer the user's question. If the 
     });
 
     return new Response(stream, {
-      headers: { ...corsHeaders(), "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Session-Id": sessionId, "X-Request-Email": "false" },
+      headers: {
+        ...corsHeaders(),
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Session-Id": sessionId,
+        "X-Request-Email": "false",
+        "X-Sources": sourcesHeader,
+      },
     });
   } catch (err) {
     console.error(err);

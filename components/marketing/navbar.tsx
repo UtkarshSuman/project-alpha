@@ -14,7 +14,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur-md">
       {/* Animated brand gradient stripe at top */}
-      <div className="absolute inset-x-0 top-0 h-[2px] brand-stripe" />
+      <div className="absolute inset-x-0 top-0 h-[3.5px] brand-stripe" />
 
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo — SVG image, theme-aware */}

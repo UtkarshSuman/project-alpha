@@ -29,7 +29,10 @@ export function Footer() {
               retrieval, tool-using action agents, and scalable business workflows.
             </p>
             <div className="mt-4 flex items-center gap-2 text-[11px] font-medium text-success">
-              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+              </span>
               All systems operational
             </div>
           </div>

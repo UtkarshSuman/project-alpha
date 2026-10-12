@@ -5,7 +5,13 @@
 // caches it locally; subsequent calls are instant. Produces 384-dim vectors.
 // ============================================================================
 
-import { pipeline, type FeatureExtractionPipeline } from "@xenova/transformers";
+import { env, pipeline, type FeatureExtractionPipeline } from "@xenova/transformers";
+
+// Configure cache directory for serverless environments (Vercel, AWS Lambda)
+// where the root filesystem is read-only except /tmp
+if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === "production") {
+  env.cacheDir = "/tmp/.cache";
+}
 
 let extractor: FeatureExtractionPipeline | null = null;
 

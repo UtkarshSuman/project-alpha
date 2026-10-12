@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { inngest } from "@/lib/inngest/client";
+import { processDocument } from "@/lib/ai/ingest";
 
 type RouteParams = { params: Promise<{ chatbotid: string; documentid: string }> };
 
@@ -32,9 +33,12 @@ export async function POST(_req: Request, { params }: RouteParams) {
       data: { status: "PENDING", errorMessage: null },
     });
 
-    await inngest.send({ name: "document/uploaded", data: { documentId: documentid } });
+    inngest.send({ name: "document/uploaded", data: { documentId: documentid } }).catch(() => {});
 
-    return NextResponse.json({ success: true });
+    // Directly re-process document
+    const result = await processDocument(documentid);
+
+    return NextResponse.json({ success: result.success, error: result.error });
   } catch (err) {
     if (err instanceof UnauthorizedError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error(err);

@@ -62,7 +62,7 @@ export function QuotaBar({
       </div>
 
       {/* Progress Track */}
-      <div className="relative h-2 w-full overflow-hidden rounded-full bg-ink/60 ring-1 ring-line">
+      <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-line/30 border border-line">
         <div
           className={cn(
             "h-full rounded-full transition-all duration-slow ease-out",

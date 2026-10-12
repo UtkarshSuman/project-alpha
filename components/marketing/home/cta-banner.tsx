@@ -90,7 +90,7 @@ export function CtaBanner({
       </div>
 
       {/* Animated brand gradient stripe at bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-[2px] brand-stripe opacity-60" />
+      <div className="absolute inset-x-0 bottom-0 h-[3px] brand-stripe opacity-80" />
     </section>
   );
 }

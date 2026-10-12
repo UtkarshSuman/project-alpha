@@ -109,8 +109,11 @@ export function ServiceComposer() {
                 <div className="mt-2 font-display text-2xl font-bold tracking-tight text-text">
                   Uveriq AI Service
                 </div>
-                <div className="mt-3 flex items-center gap-1.5 rounded-full bg-surface border border-line px-3 py-1 font-mono text-[11px] text-success">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <div className="mt-3 flex items-center gap-2 rounded-full bg-surface border border-line px-3 py-1 font-mono text-[11px] text-success">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                  </span>
                   Active Ingestion & Routing
                 </div>
                 <p className="mt-3 text-[11px] text-muted leading-snug">

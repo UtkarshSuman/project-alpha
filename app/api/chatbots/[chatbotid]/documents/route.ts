@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { uploadToStorage } from "@/lib/storage";
 import { inngest } from "@/lib/inngest/client";
+import { processDocument } from "@/lib/ai/ingest";
 import { nanoid } from "nanoid";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -94,9 +95,23 @@ export async function POST(req: Request, { params }: RouteParams) {
       await prisma.chatbot.update({ where: { id: chatbotid }, data: { status: "INGESTING" } });
     }
 
-    await inngest.send({ name: "document/uploaded", data: { documentId: document.id } });
+    // Fire inngest background job event (if configured/running)
+    inngest.send({ name: "document/uploaded", data: { documentId: document.id } }).catch(() => {});
 
-    return NextResponse.json({ document }, { status: 201 });
+    // Directly process document synchronously so embeddings are created immediately
+    // without requiring an active external Inngest dev server
+    let finalDocument: any = document;
+    try {
+      const ingestResult = await processDocument(document.id);
+      if (ingestResult.success) {
+        const refreshed = await prisma.document.findUnique({ where: { id: document.id } });
+        if (refreshed) finalDocument = refreshed;
+      }
+    } catch (ingestErr) {
+      console.warn("Direct document ingestion warning:", ingestErr);
+    }
+
+    return NextResponse.json({ document: finalDocument }, { status: 201 });
   } catch (err) {
     if (err instanceof UnauthorizedError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error(err);

@@ -23,8 +23,7 @@ export default async function PlaygroundPage({
     where: { id: chatbotid },
     include: {
       documents: {
-        where: { status: "READY" },
-        select: { id: true },
+        select: { id: true, status: true },
       },
     },
   });
@@ -32,6 +31,9 @@ export default async function PlaygroundPage({
   if (!chatbot || chatbot.orgId !== orgId || chatbot.memoryType !== "short_term") {
     notFound();
   }
+
+  const hasReadyDocs = chatbot.documents.some((d) => d.status === "READY");
+  const effectiveStatus = hasReadyDocs ? "READY" : chatbot.status;
 
   return (
     <div className="space-y-6">
@@ -69,7 +71,7 @@ export default async function PlaygroundPage({
         <ChatbotPlayground
           chatbotId={chatbot.id}
           chatbotName={chatbot.name}
-          status={chatbot.status}
+          status={effectiveStatus}
           model={chatbot.model}
           welcomeMessage={chatbot.welcomeMessage}
           documentCount={chatbot.documents.length}

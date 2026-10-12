@@ -60,7 +60,10 @@ export function ObservabilitySection() {
           </div>
 
           <div className="flex items-center gap-2 rounded-lg bg-success/10 border border-success/20 px-3 py-1.5 text-xs font-medium text-success">
-            <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+            </span>
             Global Cluster: All Systems Operational
           </div>
         </div>
@@ -108,15 +111,15 @@ export function ObservabilitySection() {
               >
                 <defs>
                   <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563eb" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor="#43a047" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#43a047" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
 
                 {/* Horizontal Grid lines */}
-                <line x1="0" y1="40" x2="800" y2="40" stroke="var(--color-line)" strokeWidth="1" />
-                <line x1="0" y1="90" x2="800" y2="90" stroke="var(--color-line)" strokeWidth="1" />
-                <line x1="0" y1="140" x2="800" y2="140" stroke="var(--color-line)" strokeWidth="1" />
+                <line x1="0" y1="40" x2="800" y2="40" stroke="var(--line, #c8e6c9)" strokeWidth="1" opacity="0.6" />
+                <line x1="0" y1="90" x2="800" y2="90" stroke="var(--line, #c8e6c9)" strokeWidth="1" opacity="0.6" />
+                <line x1="0" y1="140" x2="800" y2="140" stroke="var(--line, #c8e6c9)" strokeWidth="1" opacity="0.6" />
 
                 {/* Area under curve */}
                 <path
@@ -128,15 +131,17 @@ export function ObservabilitySection() {
                 <path
                   d="M 0 130 Q 80 110 160 120 T 320 85 T 480 95 T 640 55 T 800 65"
                   fill="none"
-                  stroke="#2563eb"
+                  stroke="#43a047"
                   strokeWidth="3"
                 />
 
                 {/* Interactive coordinate points */}
-                <circle cx="160" cy="120" r="4" fill="#2563eb" className="hover:r-6 cursor-pointer" />
-                <circle cx="320" cy="85" r="4" fill="#2563eb" className="hover:r-6 cursor-pointer" />
-                <circle cx="480" cy="95" r="4" fill="#2563eb" className="hover:r-6 cursor-pointer" />
-                <circle cx="640" cy="55" r="5" fill="#2563eb" className="animate-pulse" />
+                <circle cx="160" cy="120" r="4" fill="#00acc1" className="hover:r-6 cursor-pointer transition-all" />
+                <circle cx="320" cy="85" r="4" fill="#00acc1" className="hover:r-6 cursor-pointer transition-all" />
+                <circle cx="480" cy="95" r="4" fill="#00acc1" className="hover:r-6 cursor-pointer transition-all" />
+                {/* Live head pulse */}
+                <circle cx="640" cy="55" r="5" fill="#43a047" className="animate-pulse" />
+                <circle cx="640" cy="55" r="8" fill="#43a047" opacity="0.35" className="animate-ping" />
               </svg>
 
               {/* Time stamps */}

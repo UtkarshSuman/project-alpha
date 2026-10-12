@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MessageSquare, Clock, Database, Send, Sparkles } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 const MEMORY_MODES = [
   {
@@ -37,6 +38,7 @@ interface Message {
 export function ConversationDemo() {
   const [selectedMode, setSelectedMode] = useState<string>("short_term");
   const [inputVal, setInputVal] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "user",
@@ -53,19 +55,25 @@ export function ConversationDemo() {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputVal.trim()) return;
+    if (!inputVal.trim() || isTyping) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: inputVal },
-      {
-        role: "assistant",
-        content: `I've noted that! Under ${selectedMode.replace("_", " ")} mode, I can resolve this immediately from your workspace knowledge base.`,
-        citation: "workspace-index.v2",
-        memoryRecall: selectedMode === "long_term" ? "Saved to permanent user memory" : undefined,
-      },
-    ]);
+    const userText = inputVal;
     setInputVal("");
+    setMessages((prev) => [...prev, { role: "user", content: userText }]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `I've noted that! Under ${selectedMode.replace("_", " ")} mode, I can resolve this immediately from your workspace knowledge base.`,
+          citation: "workspace-index.v2",
+          memoryRecall: selectedMode === "long_term" ? "Saved to permanent user memory" : undefined,
+        },
+      ]);
+      setIsTyping(false);
+    }, 700);
   };
 
   return (
@@ -189,6 +197,16 @@ export function ConversationDemo() {
                     )}
                   </div>
                 ))}
+
+                {isTyping && (
+                  <div className="flex flex-col items-start animate-fade-in">
+                    <div className="flex items-center gap-1.5 rounded-2xl border border-line bg-surface px-4 py-3 shadow-2xs">
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Chat Input Field */}
@@ -205,9 +223,11 @@ export function ConversationDemo() {
                 />
                 <button
                   type="submit"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-sm hover:brightness-110 transition-colors"
+                  disabled={isTyping}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-sm hover:brightness-110 transition-colors disabled:opacity-50"
+                  aria-label="Send message"
                 >
-                  <Send className="h-3.5 w-3.5" />
+                  {isTyping ? <Spinner size="sm" /> : <Send className="h-3.5 w-3.5" />}
                 </button>
               </form>
             </div>

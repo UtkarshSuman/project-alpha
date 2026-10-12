@@ -1,23 +1,30 @@
 // ============================================================================
 // FEATURE: RAG Chatbot Playground
 // Interactive test console to simulate customer conversations with vector retrieval.
+// Features: Real-time token streaming, citation badges, grounded RAG answering.
 // ============================================================================
 
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, RotateCcw, Bot, User, FileText, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
+import { Send, RotateCcw, Bot, User, FileText, Sparkles, AlertCircle, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+type SourceCitation = {
+  filename: string;
+  similarity: number;
+};
+
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  sources?: SourceCitation[];
 };
 
 type Props = {
@@ -33,7 +40,7 @@ type Props = {
 export function ChatbotPlayground({
   chatbotId,
   chatbotName,
-  status,
+  status: initialStatus,
   model,
   welcomeMessage,
   documentCount,
@@ -49,6 +56,7 @@ export function ChatbotPlayground({
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(initialStatus);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -60,10 +68,11 @@ export function ChatbotPlayground({
     e.preventDefault();
     if (!input.trim() || loading) return;
 
+    const userText = input.trim();
     const userMsg: Message = {
       id: Math.random().toString(36).substring(7),
       role: "user",
-      content: input.trim(),
+      content: userText,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
@@ -75,47 +84,84 @@ export function ChatbotPlayground({
       const res = await fetch(`/api/chat/${chatbotId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg.content, sessionId }),
+        body: JSON.stringify({ message: userText, sessionId }),
       });
 
-      const data = await res.json();
       if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
         setMessages((prev) => [
           ...prev,
           {
             id: Math.random().toString(36).substring(7),
             role: "assistant",
-            content: `Error: ${data.error ?? "Failed to get response"}`,
+            content: `Error: ${errorData.error ?? "Failed to get response"}`,
             timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
         ]);
+        setLoading(false);
         return;
       }
 
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
+      // Update session ID from headers
+      const returnedSessionId = res.headers.get("X-Session-Id");
+      if (returnedSessionId) {
+        setSessionId(returnedSessionId);
       }
 
+      // Parse citations / sources from header
+      let citations: SourceCitation[] = [];
+      const sourcesRaw = res.headers.get("X-Sources");
+      if (sourcesRaw) {
+        try {
+          citations = JSON.parse(decodeURIComponent(sourcesRaw));
+        } catch {
+          // ignore parsing error
+        }
+      }
+
+      // Status flipped to READY if we received 200
+      if (currentStatus !== "READY") {
+        setCurrentStatus("READY");
+      }
+
+      // Prepare assistant message in state for streaming
+      const assistantId = Math.random().toString(36).substring(7);
+      const assistantMsg: Message = {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        sources: citations,
+      };
+
+      setMessages((prev) => [...prev, assistantMsg]);
+      setLoading(false); // Once streaming begins, turn off initial thinking spinner
+
+      // Stream tokens
+      if (res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          accumulated += decoder.decode(value, { stream: true });
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m))
+          );
+        }
+      }
+    } catch (err: any) {
       setMessages((prev) => [
         ...prev,
         {
           id: Math.random().toString(36).substring(7),
           role: "assistant",
-          content: data.reply,
+          content: "Network error occurred while communicating with the chatbot. Please try again.",
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(36).substring(7),
-          role: "assistant",
-          content: "Network error occurred while communicating with the chatbot.",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
-    } finally {
       setLoading(false);
     }
   }
@@ -132,10 +178,8 @@ export function ChatbotPlayground({
     setSessionId(undefined);
   }
 
-  const isReady = status === "READY";
-
   return (
-    <div className="flex h-[620px] flex-col rounded-2xl border border-line bg-surface shadow-sm overflow-hidden">
+    <div className="flex h-[640px] flex-col rounded-2xl border border-line bg-surface shadow-sm overflow-hidden">
       {/* Playground Header */}
       <div className="flex items-center justify-between border-b border-line px-5 py-3.5 bg-surface-hover/30">
         <div className="flex items-center gap-3">
@@ -145,11 +189,11 @@ export function ChatbotPlayground({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-text">{chatbotName}</span>
-              <Badge status={status} />
+              <Badge status={currentStatus} />
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5 font-mono">
               <span className="flex items-center gap-1">
-                <FileText size={11} className="text-accent-2" /> {documentCount} docs
+                <FileText size={11} className="text-accent-2" /> {documentCount} doc{documentCount !== 1 ? "s" : ""}
               </span>
               <span>&middot;</span>
               <span>{model}</span>
@@ -177,11 +221,11 @@ export function ChatbotPlayground({
         </Button>
       </div>
 
-      {!isReady && (
+      {documentCount === 0 && (
         <div className="flex items-center gap-2 border-b border-accent/20 bg-accent/10 px-5 py-2.5 text-xs text-accent">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>
-            This chatbot status is <strong>{status}</strong>. Ingest and process documents in the Overview tab to enable grounded RAG answering.
+            No documents uploaded yet. Go to the <strong>Overview</strong> tab to upload PDFs or TXT files so the chatbot can answer grounded questions.
           </span>
         </div>
       )}
@@ -214,6 +258,28 @@ export function ChatbotPlayground({
                 )}
               >
                 {m.content}
+
+                {/* Sources / Citations */}
+                {m.sources && m.sources.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-line/60">
+                    <p className="text-[11px] font-semibold text-muted mb-1.5 flex items-center gap-1">
+                      <FileText size={12} className="text-accent" />
+                      Grounded in uploaded documents:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {m.sources.map((src, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-ink/50 border border-line text-[11px] font-mono text-muted"
+                        >
+                          <CheckCircle2 size={10} className="text-accent" />
+                          {src.filename}
+                          <span className="text-accent-2">({src.similarity}%)</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <p
                 className={cn(
@@ -248,7 +314,7 @@ export function ChatbotPlayground({
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isReady ? `Ask ${chatbotName} about your documents...` : "Waiting for document ingestion..."}
+            placeholder={`Ask ${chatbotName} about your documents...`}
             disabled={loading}
             className="flex-1 bg-ink"
           />

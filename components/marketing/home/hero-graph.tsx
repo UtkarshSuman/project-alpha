@@ -18,7 +18,7 @@ const NODES: NodeItem[] = [
     name: "RETRIEVE",
     sub: "Knowledge / Context",
     icon: Database,
-    color: "#2563eb",
+    color: "#00acc1",
     coord: { x: 130, y: 80 },
   },
   {
@@ -26,7 +26,7 @@ const NODES: NodeItem[] = [
     name: "ACT",
     sub: "Tools / APIs",
     icon: Zap,
-    color: "#059669",
+    color: "#43a047",
     coord: { x: 350, y: 38 },
   },
   {
@@ -34,7 +34,7 @@ const NODES: NodeItem[] = [
     name: "AUTOMATE",
     sub: "Workflows",
     icon: Workflow,
-    color: "#7c3aed",
+    color: "#7cb342",
     coord: { x: 570, y: 80 },
   },
   {
@@ -42,7 +42,7 @@ const NODES: NodeItem[] = [
     name: "OBSERVE",
     sub: "Analytics / Monitoring",
     icon: Activity,
-    color: "#0891b2",
+    color: "#00838f",
     coord: { x: 570, y: 380 },
   },
   {
@@ -50,7 +50,7 @@ const NODES: NodeItem[] = [
     name: "CACHE",
     sub: "Low-latency Intelligence",
     icon: Cpu,
-    color: "#ea580c",
+    color: "#fb8c00",
     coord: { x: 350, y: 422 },
   },
   {
@@ -58,7 +58,7 @@ const NODES: NodeItem[] = [
     name: "REMEMBER",
     sub: "Permanent Context",
     icon: Brain,
-    color: "#db2777",
+    color: "#2e7d32",
     coord: { x: 130, y: 380 },
   },
 ];
@@ -94,9 +94,9 @@ export function HeroGraph() {
           {NODES.map((node) => {
             const isHovered = activeNode === node.id;
             const isAnyHovered = activeNode !== null;
-            const strokeColor = isHovered ? node.color : "var(--color-line)";
-            const strokeWidth = isHovered ? 3 : 1.75;
-            const opacity = isHovered ? 1 : isAnyHovered ? 0.35 : 0.75;
+            const strokeColor = isHovered ? node.color : "var(--line, #99c299)";
+            const strokeWidth = isHovered ? 2.75 : 1.75;
+            const opacity = isHovered ? 1 : isAnyHovered ? 0.35 : 0.8;
 
             // Curved bezier path from center to node
             const dx = node.coord.x - centerCoord.x;
@@ -115,20 +115,21 @@ export function HeroGraph() {
                   fill="none"
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
-                  strokeDasharray={isHovered ? "none" : "4 4"}
+                  strokeDasharray={isHovered ? "none" : "5 5"}
                   opacity={opacity}
                   className="transition-all duration-300"
                 />
 
-                {/* Animated pulse dot moving along the path */}
+                {/* Animated pulse dot moving along the path with glow */}
                 <circle
-                  r={isHovered ? 4 : 2.5}
-                  fill={isHovered ? node.color : "#3b82f6"}
-                  opacity={isHovered ? 1 : 0.75}
+                  r={isHovered ? 5.5 : 4}
+                  fill={node.color}
+                  opacity={isHovered ? 1 : 0.9}
+                  filter="url(#glow)"
                 >
                   <animateMotion
                     path={pathD}
-                    dur={isHovered ? "1.8s" : "3.2s"}
+                    dur={isHovered ? "1.8s" : "3s"}
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -147,7 +148,10 @@ export function HeroGraph() {
             </span>
             <div className="mt-1 flex items-center gap-2 font-display text-2xl font-bold tracking-tight text-text sm:text-3xl">
               <span>UVERIQ</span>
-              <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent animate-pulse" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+              </span>
             </div>
             <div className="mt-1.5 inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-muted sm:text-[11px]">
               AI SERVICE LAYER
