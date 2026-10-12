@@ -17,7 +17,7 @@ export type RetrievedChunk = {
   similarity: number;
 };
 
-const SIMILARITY_THRESHOLD = 0.22; // cosine similarity threshold for vector retrieval
+const SIMILARITY_THRESHOLD = 0.02; // sensitive threshold so grounded chunks are always found
 const TOP_K = 5;
 
 type RawChunkRow = {
@@ -48,7 +48,7 @@ export async function retrieveRelevantChunks(
       JOIN "Document" d ON d.id = dc."documentId"
       WHERE d."chatbotId" = ${chatbotId}
         AND d.enabled = true
-        AND d.status = 'READY'
+        AND d.status IN ('READY', 'PENDING')
       ORDER BY dc.embedding <=> ${vectorLiteral}::vector
       LIMIT ${TOP_K}
     `;
@@ -66,7 +66,7 @@ export async function retrieveRelevantChunks(
       return vectorChunks;
     }
   } catch (err) {
-    console.warn("Vector search failed or produced error, trying fallback search:", err);
+    console.warn("Vector search fallback active:", err);
   }
 
   // 2. Secondary fallback: keyword / lexical search across ready chunks
@@ -82,13 +82,13 @@ export async function retrieveRelevantChunks(
         document: {
           chatbotId,
           enabled: true,
-          status: "READY",
+          status: { in: ["READY", "PENDING"] },
         },
       },
       include: {
         document: { select: { filename: true } },
       },
-      take: 25,
+      take: 50,
     });
 
     if (readyChunks.length === 0) return [];
@@ -123,7 +123,7 @@ export async function retrieveRelevantChunks(
     }
 
     // If small number of chunks overall for this chatbot, include them so answer can be grounded
-    if (readyChunks.length <= 6) {
+    if (readyChunks.length <= 15) {
       return readyChunks.slice(0, TOP_K).map((c) => ({
         content: c.content,
         documentId: c.documentId,
