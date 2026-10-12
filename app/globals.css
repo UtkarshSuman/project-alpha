@@ -119,8 +119,8 @@
   --warning: #fb8c00;          /* amber orange from logo */
   --danger: #c62828;
   --danger-muted: #ffebee;
-  --skeleton-base: #d6e6d6;
-  --skeleton-highlight: #f4faf4;
+  --skeleton-base: #e2ede2;
+  --skeleton-highlight: rgba(255, 255, 255, 0.85);
 }
 
 .dark,
@@ -138,8 +138,8 @@
   --warning: #ffca28;
   --danger: #ef5350;
   --danger-muted: #1a0a0a;
-  --skeleton-base: #142a14;
-  --skeleton-highlight: #285428;
+  --skeleton-base: rgba(255, 255, 255, 0.08);
+  --skeleton-highlight: rgba(255, 255, 255, 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -156,8 +156,8 @@
     --warning: #ffca28;
     --danger: #ef5350;
     --danger-muted: #1a0a0a;
-    --skeleton-base: #142a14;
-    --skeleton-highlight: #285428;
+    --skeleton-base: rgba(255, 255, 255, 0.08);
+    --skeleton-highlight: rgba(255, 255, 255, 0.22);
   }
 }
 
@@ -201,26 +201,37 @@ body {
 }
 
 /* ============================================================================
-   Skeleton Shimmer Loading Animation (High Contrast & Visible in Light & Dark)
+   Twitter/X Style Skeleton Shimmer Loading Animation (Continuous sweeping wave)
    ============================================================================ */
-@keyframes skeleton-shimmer {
+@keyframes twitter-shimmer {
   0% {
-    background-position: -200% 0;
+    transform: translateX(-100%);
   }
   100% {
-    background-position: 200% 0;
+    transform: translateX(100%);
   }
 }
 
 .skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--skeleton-base);
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
   background: linear-gradient(
     90deg,
-    var(--skeleton-base) 0%,
+    transparent 0%,
     var(--skeleton-highlight) 50%,
-    var(--skeleton-base) 100%
+    transparent 100%
   );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  animation: twitter-shimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+  pointer-events: none;
 }
 
 /* Page & Section Fade-in Animation */
