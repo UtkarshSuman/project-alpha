@@ -20,8 +20,9 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
   const res = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: texts,
+    dimensions: 384,
   });
   return res.data.map((d) => d.embedding);
 }
 
-// export const EMBEDDING_DIMENSIONS = 1536;
+export const EMBEDDING_DIMENSIONS = 384;
