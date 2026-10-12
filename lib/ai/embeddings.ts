@@ -1,10 +1,10 @@
 // ============================================================================
-// FEATURE: Multi-provider Embeddings with Instant Free Serverless Fallback
+// FEATURE: Multi-provider Embeddings with Fast 100% Free Default
 // Supports:
-// 1. "openai": text-embedding-3-small (dimensions: 384) via OPENAI_API_KEY
-// 2. "huggingface": all-MiniLM-L6-v2 via HF_TOKEN (if user has active HF inference credits)
-// 3. "fast" / default: 100% FREE, instant 384-dimensional offline vectorizer (zero API keys,
+// 1. "fast" / default: 100% FREE, instant 384-dimensional offline vectorizer (zero external APIs,
 //    zero credit card, zero rate limits, works reliably on Vercel Serverless & local dev).
+// 2. "openai": text-embedding-3-small (dimensions: 384) via OPENAI_API_KEY
+// 3. "huggingface": all-MiniLM-L6-v2 via HF_TOKEN (only if explicitly set as provider)
 // ============================================================================
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
@@ -23,24 +23,23 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
     }
   }
 
-  // 2. Explicit or auto-detected Hugging Face (if user configured HF_TOKEN)
+  // 2. Explicit Hugging Face ONLY when user explicitly asks for it
   if (
-    (explicitProvider === "huggingface" || explicitProvider === "hf" || process.env.HF_TOKEN) &&
+    (explicitProvider === "huggingface" || explicitProvider === "hf") &&
     process.env.HF_TOKEN
   ) {
     try {
       const { embedTexts } = await import("./embeddings-huggingface");
       return await embedTexts(texts);
     } catch (hfErr) {
-      // If Hugging Face returns 402 (no credits) or rate limit, smoothly fallback
       console.warn(
-        "Hugging Face inference error/no credits, seamlessly falling back to fast offline vectorizer:",
+        "Hugging Face inference error/no credits, falling back to fast offline vectorizer:",
         hfErr
       );
     }
   }
 
-  // 3. Fast offline 384-dimensional vectorizer: 100% free, runs instantly anywhere
+  // 3. Fast offline 384-dimensional vectorizer: 100% free, zero external API calls
   const { embedTexts } = await import("./embeddings-fast");
   return embedTexts(texts);
 }
