@@ -11,7 +11,6 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrg, UnauthorizedError } from "@/lib/auth/session";
 import { uploadToStorage } from "@/lib/storage";
 import { inngest } from "@/lib/inngest/client";
-import { processDocument } from "@/lib/ai/ingest";
 import { nanoid } from "nanoid";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -102,6 +101,7 @@ export async function POST(req: Request, { params }: RouteParams) {
     // without requiring an active external Inngest dev server
     let finalDocument: any = document;
     try {
+      const { processDocument } = await import("@/lib/ai/ingest");
       const ingestResult = await processDocument(document.id);
       if (ingestResult.success) {
         const refreshed = await prisma.document.findUnique({ where: { id: document.id } });

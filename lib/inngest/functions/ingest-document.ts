@@ -38,7 +38,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getFromStorage } from "@/lib/storage";
 import { chunkText } from "@/lib/ai/chunk";
 import { embedTexts } from "@/lib/ai/embeddings";
-import { PDFParse } from "pdf-parse";
+import { extractText, getDocumentProxy } from "unpdf";
 import { nanoid } from "nanoid";
 
 export const ingestDocument = inngest.createFunction(
@@ -94,9 +94,9 @@ export const ingestDocument = inngest.createFunction(
       let text = "";
 
       if (document.fileType === "pdf") {
-        const parser = new PDFParse({ data: buffer });
-        const result = await parser.getText();
-        text = result.text;
+        const pdf = await getDocumentProxy(new Uint8Array(buffer));
+        const result = await extractText(pdf, { mergePages: true });
+        text = Array.isArray(result.text) ? result.text.join("\n\n") : (result.text ?? "");
       } else {
         text = buffer.toString("utf-8");
       }

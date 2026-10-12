@@ -25,13 +25,13 @@
     "next": "16.2.10",
     "next-auth": "^4.24.14",
     "openai": "^7.4.0",
-    "pdf-parse": "^2.4.5",
     "razorpay": "^2.9.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.9.2",
     "resend": "^6.18.1",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.2",
