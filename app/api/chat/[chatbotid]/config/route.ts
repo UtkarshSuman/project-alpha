@@ -22,7 +22,11 @@ import { isOriginAllowed } from "@/lib/security/origin-check";
 type RouteParams = { params: Promise<{ chatbotid: string }> };
 
 function corsHeaders() {
-  return { "Access-Control-Allow-Origin": "*" };
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
 }
 
 export async function OPTIONS() {

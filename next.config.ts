@@ -15,12 +15,20 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/automation-widget.js",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+      {
+        // Covers both POST /api/chat/:id  AND  GET /api/chat/:id/config
         source: "/api/chat/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "POST, OPTIONS" },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
-          { key: "Access-Control-Expose-Headers", value: "X-Session-Id, X-Request-Email" },
+          { key: "Access-Control-Expose-Headers", value: "X-Session-Id, X-Request-Email, X-Sources" },
         ],
       },
     ];

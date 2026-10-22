@@ -228,7 +228,9 @@ export function Topbar({ user, onMenuOpen }: TopbarProps) {
           <Plus size={13} className="text-accent" />
           <span>New Service</span>
         </Link>
-        <ThemeToggle />
+        <div data-guide-id="topbar-theme">
+          <ThemeToggle />
+        </div>
         <UserMenu user={user} />
       </div>
     </header>

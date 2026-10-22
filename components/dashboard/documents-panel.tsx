@@ -164,6 +164,8 @@ export function DocumentsPanel({
 
       {/* Upload Dropzone */}
       <div
+        data-guide-id="upload-dropzone"
+        data-guide="Upload a PDF, CSV, or text file here. Uveriq will chunk and embed it automatically."
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();

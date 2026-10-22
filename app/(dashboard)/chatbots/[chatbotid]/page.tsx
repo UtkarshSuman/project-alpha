@@ -107,7 +107,7 @@ export default async function ChatbotOverviewPage({
       {/* ── Main Content Sections ───────────────────────────── */}
       <div className="space-y-10">
         {/* Knowledge Documents Section */}
-        <section>
+        <section data-guide-id="documents-panel">
           <DocumentsPanel
             chatbotid={chatbotid}
             initialDocuments={chatbot.documents.map((d) => ({
@@ -118,7 +118,7 @@ export default async function ChatbotOverviewPage({
         </section>
 
         {/* Integration & Embed Snippet Section */}
-        <section className="space-y-3">
+        <section data-guide-id="embed-snippet" className="space-y-3">
           <div>
             <h2 className="font-display text-lg font-medium text-text">Embed on your Website</h2>
             <p className="mt-0.5 text-xs text-muted">
@@ -129,7 +129,7 @@ export default async function ChatbotOverviewPage({
         </section>
 
         {/* API Keys Section */}
-        <section>
+        <section data-guide-id="api-keys-section">
           <ChatbotKeysSection
             chatbotid={chatbotid}
             initialKeys={activeKeys.map((k) => ({

@@ -14,8 +14,8 @@
 // - Full responsive bottom-sheet mode with drag-bar for mobile devices
 // ============================================================================
 
-(function () {
-  const scriptTag = document.currentScript;
+(function (_scriptTag) {
+  const scriptTag = _scriptTag || document.currentScript;
   if (!scriptTag) return;
 
   const chatbotId = scriptTag.getAttribute("data-chatbot-id");
@@ -1112,4 +1112,4 @@
   }
 
   init();
-})();
+})(document.currentScript);

@@ -45,25 +45,28 @@ type NavLink = {
   label: string;
   icon: React.ElementType;
   subItems?: NavSubItem[];
+  /** data-guide-id attribute for onboarding tour targeting */
+  guideId?: string;
 };
 
 const navSections: { label: string; links: NavLink[] }[] = [
   {
     label: "Platform",
     links: [
-      { href: "/dashboard", label: "Overview", icon: LayoutGrid },
+      { href: "/dashboard", label: "Overview", icon: LayoutGrid, guideId: "sidebar-overview" },
       {
         href: "/chatbots",
         label: "Chatbots",
         icon: Bot,
+        guideId: "sidebar-chatbots",
         subItems: [
           { href: "/chatbots", label: "Simple", icon: MessageSquare },
           { href: "/chatbots/short-term", label: "Short-term", icon: Clock },
           { href: "/chatbots/long-term", label: "Long-term", icon: Database },
         ],
       },
-      { href: "/tool-agents", label: "Tool Agents", icon: Zap },
-      { href: "/automation-agents", label: "Automations", icon: Workflow },
+      { href: "/tool-agents", label: "Tool Agents", icon: Zap, guideId: "sidebar-tool-agents" },
+      { href: "/automation-agents", label: "Automations", icon: Workflow, guideId: "sidebar-automation-agents" },
     ],
   },
   {
@@ -108,6 +111,7 @@ function NavItem({
   active,
   collapsed,
   onClick,
+  guideId,
 }: {
   href: string;
   label: string;
@@ -115,12 +119,14 @@ function NavItem({
   active: boolean;
   collapsed: boolean;
   onClick?: () => void;
+  guideId?: string;
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
       title={collapsed ? label : undefined}
+      {...(guideId ? { "data-guide-id": guideId } : {})}
       className={cn(
         "group flex items-center rounded-md transition-colors duration-fast outline-none",
         "focus-visible:ring-2 focus-visible:ring-accent-2 focus-visible:ring-offset-1",
@@ -434,6 +440,7 @@ function SidebarContent({
                     active={isActive(link.href)}
                     collapsed={collapsed && !isMobile}
                     onClick={onClose}
+                    guideId={link.guideId}
                   />
                 )
               )}
